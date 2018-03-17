@@ -1,0 +1,37 @@
+<html>
+	<head>
+		<title> Informe de visual regression testing </title>
+  		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>		
+		<script src="static/resemblejs/resemble.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+	</head>
+
+
+    <div class="panel panel-primary">
+      <div class="panel-heading">Informe de visual regression testing</div>
+      <div class="panel-body">
+	<button id="probar" class="btn btn-primary btn-block" onclick="enviarPrueba()">Generar reporte</button>
+	<div class="container">
+		<div class="table-responsive table table-striped" id='diff'>
+		   <table class="table">
+		    <thead>
+		      <tr>
+			<th>Fecha</th>
+			<th>Imagen Base</th>
+			<th>Imagen Modificada</th>
+			<th>Diferencias</th>
+			<th>Información importante</th>
+		      </tr>
+		    </thead>
+		    <tbody id="info">
+
+		    </tbody>
+		  </table>	
+		</div>
+	</div>
+     </div>
+   </div>
+   <script src="static/reportes.js"></script>
+<html>

@@ -1,0 +1,19 @@
+{
+    "name": "node-api",
+    "main": "server.js",
+    "dependencies": {
+        "body-parser": "~1.0.1",
+        "express": "~4.0.0",
+        "mongodb": "^3.0.2",
+        "mongoose": "^5.0.2",
+        "mz": "^2.7.0",
+        "requirejs": "^2.3.5",
+        "resemblejs": "^2.10.0",
+        "shelljs": "^0.8.1",
+        "uuid": "^3.2.1",
+        "xvfb": "^0.2.3"
+    },
+    "devDependencies": {
+        "cypress": "^2.1.0"
+    }
+}
