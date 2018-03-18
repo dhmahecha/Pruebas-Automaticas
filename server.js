@@ -59,10 +59,16 @@ router.route('/herramientaspruebas')
 
     .post(function(req, res) {
         var herramientaprueba = new HerramientasPruebas();      // create a new instance of the HerramientasPruebas model
-        herramientaprueba.NOMBRE = req.body.nombre;
-		herramientaprueba.RUTA_EJECUTABLE = req.body.rutaEjecutable;
-		herramientaprueba.RUTA_LOGS = req.body.rutaLogs;
-		herramientaprueba.COMANDO_EJECUCION = req.body.comandoEjecucion;
+        herramientaprueba.idHerramienta = req.body.idHerramienta;
+		herramientaprueba.nombreHerramienta = req.body.nombreHerramienta;
+		herramientaprueba.rutaReportes = req.body.rutaReportes;
+		herramientaprueba.rutaHttpVideos = req.body.rutaHttpVideos;	
+		herramientaprueba.rutaFisicaVideos = req.body.rutaFisicaVideos;		
+		herramientaprueba.rutaImagenes = req.body.rutaImagenes;
+		herramientaprueba.rutaScreenhots = req.body.rutaScreenhots;		
+		herramientaprueba.rutaLogs = req.body.rutaLogs;
+		herramientaprueba.comandoEjecucion = req.body.comandoEjecucion;
+
         // save the herramienta de pruebas and check for errors
         herramientaprueba.save(function(err) {
             if (err)
@@ -114,6 +120,8 @@ router.route('/reportes')
 router.route('/ejecutar')
     .post(function(req, res) {
 
+
+
         var reporte = new Reportes();      // create a new instance of the Reportes model
         reporte.ruta_img_base = req.body.ruta_img_base;  
 		reporte.ruta_img_modificada = req.body.ruta_img_modificada;
@@ -150,8 +158,7 @@ router.route('/ejecutar')
 		env:{
 			screen: nombreArchivo,
 		}
-	}
-	)
+	})
 	.then((results) => {
 		console.log(results)
 		const options = {};

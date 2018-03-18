@@ -4,11 +4,16 @@ var mongoose     = require('mongoose');
 var Schema       = mongoose.Schema;
 
 var HerramientasPruebasSchema   = new Schema({
-    NOMBRE: String,
-    RUTA_EJECUTABLE: String,
-    RUTA_LOGS: String,	
-    COMANDO_EJECUCION: String,
-    FECHA_CREACION: { type: Date, default: Date.now }
+    idHerramienta: Number, 
+    nombreHerramienta: String,
+    rutaReportes: String,
+    rutaHttpVideos: String,
+    rutaFisicaVideos: String,
+    rutaImagenes: String,
+    rutaScreenhots: String,
+    rutaLogs: String,
+    comandoEjecucion: String,
+    fechaCreacion: { type: Date, default: Date.now }
 });
 
 module.exports = mongoose.model('HerramientasPruebas', HerramientasPruebasSchema);
