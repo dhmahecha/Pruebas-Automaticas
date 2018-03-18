@@ -5,8 +5,11 @@ var Schema       = mongoose.Schema;
 
 var ReportesSchema   = new Schema({
     idReporte: Number,
-    idHerramienta: Number,
-    idAplicacion: String,	
+    idPrueba: Number,
+    urlImagen: String,
+    urlVideo: String,
+    urlLog: String,
+    informacion: String,
     fechaReporte: { type: Date, default: Date.now }
 });
 

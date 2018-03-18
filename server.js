@@ -3,14 +3,12 @@
 // BASE SETUP
 // =============================================================================
 
-console.log(process.env.CONEXION_MONGO_TOOL);
 var mongoose   = require('mongoose');
 mongoose.connect(process.env.CONEXION_MONGO_TOOL); 
 
 // call the packages we need
 var exec = require('child_process').exec, child;
-var Reportes    = require('./models/reportes');
-var HerramientasPruebas    = require('./models/herramientaspruebas');        
+var Reportes    = require('./models/reportes');       
 var express    = require('express');        // call express
 var app        = express();                 // define our app using express
 var bodyParser = require('body-parser');
@@ -20,16 +18,23 @@ const fs = require("mz/fs");
 const compare = require('resemblejs').compare;
 const uuidv4 = require('uuid/v4');
 const compareImages = require('resemblejs/compareImages');
-
-const ruta_screenshots = 'cypress/screenshots/';
-const ruta_http_screenshots = 'static/imagenes/';
-const rutaImagenes = 'public/imagenes/';
+const HERRAMIENTA_CYPRESS = 1;
+const NYGTHWATCH = 2;
+const LIGHTHOUSE = 3;
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+var HerramientasPruebas    = require('./models/herramientaspruebas'); 
+var Aplicaciones    = require('./models/aplicaciones'); 
+var Pruebas    = require('./models/pruebas'); 
+var Reportes    = require('./models/reportes'); 
+
+const ruta_screenshots = 'cypress/screenshots/';
+const ruta_http_screenshots = 'static/imagenes/';
+const rutaImagenes = 'public/imagenes/';
 
 
 var port = process.env.PORT || 8080;        // set our port
@@ -55,8 +60,22 @@ router.get('/api', function(req, res) {
     res.json({ message: 'Bienvenido al api rest' });   
 });
 
-router.route('/herramientaspruebas')
 
+ function getPrueba (id) {
+		return Pruebas.findOne(
+			// query
+    		{idPrueba: id},
+			// callback function
+			(err, prueba) => {
+				if (err) 
+					return res.send(err);
+				return prueba;
+			}
+ 
+        );
+}	
+
+router.route('/herramientaspruebas')
     .post(function(req, res) {
         var herramientaprueba = new HerramientasPruebas();      // create a new instance of the HerramientasPruebas model
         herramientaprueba.idHerramienta = req.body.idHerramienta;
@@ -78,7 +97,6 @@ router.route('/herramientaspruebas')
         });
 
     })
-
    .get(function(req, res) {
         HerramientasPruebas.find(function(err, herramientaspruebas) {
             if (err)
@@ -90,24 +108,113 @@ router.route('/herramientaspruebas')
     });
 
 
-router.route('/reportes')
-
-		
+router.route('/aplicaciones')
     .post(function(req, res) {
-
-        var reporte = new Reportes();      // create a new instance of the Reportes model
-        reporte.ruta_img_base = req.body.ruta_img_base;  
-		reporte.ruta_img_modificada = req.body.ruta_img_modificada;
-        // save the bear and check for errors
-        reporte.save(function(err) {
+        var aplicacion = new Aplicaciones();      // create a new instance of the Aplicaciones model
+        aplicacion.idAplicacion = req.body.idAplicacion;  
+		aplicacion.nombreAplicacion = req.body.nombreAplicacion;
+		aplicacion.urlAplicacion = req.body.urlAplicacion;
+        // save the aplicacion and check for errors
+        aplicacion.save(function(err) {
             if (err)
                 res.send(err);
 
-            res.json({ message: 'reporte creado!' });
+            res.json({ message: 'aplicacion creada!' });
         });
 
     })
+   .get(function(req, res) {
+        Aplicaciones.find(function(err, aplicaciones) {
+            if (err)
+                res.send(err);
 
+	    	console.log('Este rest se esta ejecutando.' + aplicaciones); 	
+            res.json(aplicaciones);
+        });
+    });
+
+router.route('/pruebas')		
+    .post(function(req, res) {
+
+        var prueba = new Pruebas();      // create a new instance of the Pruebas model
+        prueba.idPrueba = req.body.idPrueba;  
+		prueba.idHerramienta = req.body.idHerramienta;
+		prueba.idAplicacion = req.body.idAplicacion;
+		prueba.rutaArchivo = req.body.rutaArchivo;
+        // save the prueba and check for errors
+        prueba.save(function(err) {
+            if (err)
+                res.send(err);
+
+            res.json({ message: 'Prueba creada!' });
+        });
+
+    })
+    .get(function(req, res) {
+        Pruebas.find(function(err, pruebas) {
+            if (err)
+                res.send(err);
+            res.json(pruebas);
+        });
+    });
+
+router.route('/reportes')
+    .post(function(req, res) {
+		var reporte = new Reportes();      // create a new instance of the Reportes model
+		Pruebas.findOne(
+			// query
+			{idPrueba: req.body.idPrueba},
+			// callback function
+			(err, prueba) => {
+			if (err) 
+				return err;
+			return  prueba;
+		})
+		.then((results) => {
+			var prueba = results;
+			reporte.idReporte = req.body.idReporte; 
+			reporte.idPrueba = req.body.idPrueba;
+			HerramientasPruebas.findOne(
+				// query
+				{idHerramienta: prueba.idHerramienta},
+				// callback function
+				(err, herramienta) => {
+				if (err) 
+					return err;
+				return  herramienta;
+			})
+			.then((results) => {
+				console.log(results);
+				if(prueba.idHerramienta == HERRAMIENTA_CYPRESS){
+					cypress.run({
+						spec: prueba.rutaArchivo,
+						env:{
+							screen: req.body.idPrueba,
+							}
+					})
+					.then((results) => {
+						console.log(results);
+						reporte.urlImagen = req.body.urlImagen;
+						reporte.urlVideo = req.body.urlVideo;
+						reporte.urlLog = req.body.urlLog;	
+						// save the reporte and check for errors
+						reporte.save(function(err) {
+						if (err)
+							res.send(err);
+							res.json({ message: 'reporte creado!' });
+						});
+					});
+				}
+				else if(prueba.idHerramienta == HERRAMIENTA_CYPRESS){
+
+
+				}
+				else if(prueba.idHerramienta == LIGHTHOUSE){
+
+				}
+			});	
+		});
+    })
     .get(function(req, res) {
         Reportes.find(function(err, reportes) {
             if (err)
@@ -116,16 +223,12 @@ router.route('/reportes')
         });
     });
 
-
 router.route('/ejecutar')
     .post(function(req, res) {
-
-
-
         var reporte = new Reportes();      // create a new instance of the Reportes model
         reporte.ruta_img_base = req.body.ruta_img_base;  
 		reporte.ruta_img_modificada = req.body.ruta_img_modificada;
-        // save the bear and check for errors
+        // save the reporte and check for errors
         reporte.save(function(err) {
             if (err)
                 res.send(err);
@@ -134,75 +237,73 @@ router.route('/ejecutar')
         });
 
     })
-
-
-
-
     .get(function(req, res) {
+		var nombreArchivo = uuidv4();
 
-	var nombreArchivo = uuidv4();
+		var rutaCypressArchivo1 = ruta_screenshots + nombreArchivo+"1.png";
+		var rutaCypressArchivo2 = ruta_screenshots + nombreArchivo+"2.png";
+		var rutaSalidaFisica = 'public/comparacion/' + nombreArchivo + "-salida.png";
+		var rutaSalidaHttp = 'static/comparacion/' + nombreArchivo + "-salida.png";	
+		var rutaImagenesArchivo1 = rutaImagenes + nombreArchivo+"1.png";
+		var rutaImagenesArchivo2 = rutaImagenes + nombreArchivo+"2.png";
+		var rutaHttpArchivo1 = ruta_http_screenshots + nombreArchivo+"1.png";
+		var rutaHttpArchivo2 = ruta_http_screenshots + nombreArchivo+"2.png";
 
-	var rutaCypressArchivo1 = ruta_screenshots + nombreArchivo+"1.png";
-	var rutaCypressArchivo2 = ruta_screenshots + nombreArchivo+"2.png";
-	var rutaSalidaFisica = 'public/comparacion/' + nombreArchivo + "-salida.png";
-	var rutaSalidaHttp = 'static/comparacion/' + nombreArchivo + "-salida.png";	
-	var rutaImagenesArchivo1 = rutaImagenes + nombreArchivo+"1.png";
-	var rutaImagenesArchivo2 = rutaImagenes + nombreArchivo+"2.png";
-	var rutaHttpArchivo1 = ruta_http_screenshots + nombreArchivo+"1.png";
-	var rutaHttpArchivo2 = ruta_http_screenshots + nombreArchivo+"2.png";
+		var informacionImportante;
 
-	var informacionImportante;
-
-	cypress.run({
-		spec: './cypress/integration/simple_spec.js',
-		env:{
-			screen: nombreArchivo,
-		}
-	})
-	.then((results) => {
-		console.log(results)
-		const options = {};
+		cypress.run({
+			spec: './cypress/integration/simple_spec.js',
+			env:{
+				screen: nombreArchivo,
+			}
+		})
+		.then((results) => {
+			console.log(results)
+			const options = {};
+			
+			shell.cp(rutaCypressArchivo1, rutaImagenes);
+			shell.cp(rutaCypressArchivo2, rutaImagenes);
 		
-		shell.cp(rutaCypressArchivo1, rutaImagenes);
-		shell.cp(rutaCypressArchivo2, rutaImagenes);
-	
-		compare(rutaCypressArchivo1, rutaCypressArchivo2, options, function (err, data) {
-		if (err) {
-			console.log('An error!' + err)
-		} else {
-			console.log(data);
-			fs.writeFile(rutaSalidaFisica, data.getBuffer());
+			compare(rutaCypressArchivo1, rutaCypressArchivo2, options, function (err, data) {
+			if (err) {
+				console.log('An error!' + err)
+			} else {
+				console.log(data);
+				fs.writeFile(rutaSalidaFisica, data.getBuffer());
 
-			informacionImportante = 
-				"<b>Tiene las mismas dimensiones:</b> " + data.isSameDimensions + "<br>" +
-				"<b>Diferencia de dimensiones:</b> " + "<b>width:</b> " +  data.dimensionDifference.width +", <b>height:</b> " + 									data.dimensionDifference.height + "<br>" +
-				"<b>Porcentaje de coincidencia erronea:</b> " + data.rawMisMatchPercentage + "<br>" + 
-				"<b>Límites de diferencia:</b> " + "<b>top:</b> " + data.diffBounds.top + ", <b>left:</b> " + data.diffBounds.left + ", 									<b>bottom:</b> " + data.diffBounds.bottom + ", <b>right:</b> " + data.diffBounds.right  +"<br>" + 
-				"<b>Analisis de tiempo:</b> " +  data.analysisTime;
+				informacionImportante = 
+					"<b>Tiene las mismas dimensiones:</b> " + data.isSameDimensions + "<br>" +
+					"<b>Diferencia de dimensiones:</b> " + "<b>width:</b> " +  data.dimensionDifference.width +", <b>height:</b> " + 									data.dimensionDifference.height + "<br>" +
+					"<b>Porcentaje de coincidencia erronea:</b> " + data.rawMisMatchPercentage + "<br>" + 
+					"<b>Límites de diferencia:</b> " + "<b>top:</b> " + data.diffBounds.top + ", <b>left:</b> " + data.diffBounds.left + ", 									<b>bottom:</b> " + data.diffBounds.bottom + ", <b>right:</b> " + data.diffBounds.right  +"<br>" + 
+					"<b>Analisis de tiempo:</b> " +  data.analysisTime;
 
-		 	var reporte = new Reportes();      // create a new instance of the Reportes model
-			reporte.ruta_img_base =   rutaHttpArchivo1;
-			reporte.ruta_img_modificada = rutaHttpArchivo2;
-			reporte.ruta_img_salida = rutaSalidaHttp;
-			reporte.informacion = informacionImportante;
-			// save the bear and check for errors
-			reporte.save(function(err) {
-			    if (err)
-				res.send(err);
+				var reporte = new Reportes();      // create a new instance of the Reportes model
+				reporte.ruta_img_base =   rutaHttpArchivo1;
+				reporte.ruta_img_modificada = rutaHttpArchivo2;
+				reporte.ruta_img_salida = rutaSalidaHttp;
+				reporte.informacion = informacionImportante;
+				// save the bear and check for errors
+				reporte.save(function(err) {
+					if (err)
+					res.send(err);
+				});
+				console.log(informacionImportante);
+			}
 			});
-			console.log(informacionImportante);
-		}
-		});
 
 
-	})
-	.catch((err)=>{console.error(err)})
+		})
+		.catch((err)=>{console.error(err)})
 
 
 
 
-	res.json("OK");
+		res.json("OK");
     });
+
+
+
 
 // more routes for our API will happen here
 
