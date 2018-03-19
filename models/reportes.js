@@ -9,6 +9,7 @@ var ReportesSchema   = new Schema({
     urlImagen: String,
     urlVideo: String,
     urlLog: String,
+    urlReporte: String,
     informacion: String,
     fechaReporte: { type: Date, default: Date.now }
 });

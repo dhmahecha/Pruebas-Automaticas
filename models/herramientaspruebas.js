@@ -13,6 +13,7 @@ var HerramientasPruebasSchema   = new Schema({
     rutaScreenshots: String,
     rutaLogs: String,
     comandoEjecucion: String,
+    rutaConfiguracion: String,
     fechaCreacion: { type: Date, default: Date.now }
 });
 
