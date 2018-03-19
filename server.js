@@ -22,6 +22,9 @@ const HERRAMIENTA_CYPRESS = 1;
 const NYGTHWATCH = 2;
 const LIGHTHOUSE = 3;
 
+const PRUEBA_SEQ = "seq_pruebas";
+const REPORTE_SEQ = "seq_reportes";
+
 // configure app to use bodyParser()
 // this will let us get the data from a POST
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -31,6 +34,8 @@ var HerramientasPruebas    = require('./models/herramientaspruebas');
 var Aplicaciones    = require('./models/aplicaciones'); 
 var Pruebas    = require('./models/pruebas'); 
 var Reportes    = require('./models/reportes'); 
+var SeqPruebas    = require('./models/seqpruebas'); 
+var SeqReportes    = require('./models/seqreportes'); 
 
 const ruta_screenshots = 'cypress/screenshots/';
 const ruta_http_screenshots = 'static/imagenes/';
@@ -61,19 +66,6 @@ router.get('/api', function(req, res) {
 });
 
 
- function getPrueba (id) {
-		return Pruebas.findOne(
-			// query
-    		{idPrueba: id},
-			// callback function
-			(err, prueba) => {
-				if (err) 
-					return res.send(err);
-				return prueba;
-			}
- 
-        );
-}	
 
 router.route('/herramientaspruebas')
     .post(function(req, res) {
@@ -135,20 +127,46 @@ router.route('/aplicaciones')
 
 router.route('/pruebas')		
     .post(function(req, res) {
+		SeqPruebas.findOne(
+			// query
+			{sequenceName: PRUEBA_SEQ},
+			// callback function
+			(err, seqPrueba) => {
+			if (err) 
+				return err;
+			return  seqPrueba;
+		})
+		.then((results) => {
+			secuencia = results.sequenceValue + 1;
+			SeqPruebas.findOne(
+				// query
+				{sequenceName: PRUEBA_SEQ},
+				// callback function
+				(err, seqPrueba) => {
+				if (err) 
+					return err;
+					
+				seqPrueba.sequenceValue = secuencia;
+				seqPrueba.save(function (err, seqPrueba) {
+					if (err) 
+						return err;	
+					console.log("despues " + seqPrueba.sequenceValue);				
+					return  seqPrueba;
+				});	
+			});
+			var prueba = new Pruebas();      // create a new instance of the Pruebas model
+			prueba.idPrueba = secuencia;  
+			prueba.idHerramienta = req.body.idHerramienta;
+			prueba.idAplicacion = req.body.idAplicacion;
+			prueba.rutaArchivo = req.body.rutaArchivo;
+			// save the prueba and check for errors
+			prueba.save(function(err) {
+				if (err)
+					res.send(err);
 
-        var prueba = new Pruebas();      // create a new instance of the Pruebas model
-        prueba.idPrueba = req.body.idPrueba;  
-		prueba.idHerramienta = req.body.idHerramienta;
-		prueba.idAplicacion = req.body.idAplicacion;
-		prueba.rutaArchivo = req.body.rutaArchivo;
-        // save the prueba and check for errors
-        prueba.save(function(err) {
-            if (err)
-                res.send(err);
-
-            res.json({ message: 'Prueba creada!' });
-        });
-
+				res.json({ message: 'Prueba creada!' });
+			});	
+		});			
     })
     .get(function(req, res) {
         Pruebas.find(function(err, pruebas) {
@@ -160,61 +178,98 @@ router.route('/pruebas')
 
 router.route('/reportes')
     .post(function(req, res) {
-		var reporte = new Reportes();      // create a new instance of the Reportes model
-		Pruebas.findOne(
+
+		SeqReportes.findOne(
 			// query
-			{idPrueba: req.body.idPrueba},
+			{sequenceName: REPORTE_SEQ},
 			// callback function
-			(err, prueba) => {
+			(err, seqReporte) => {
 			if (err) 
 				return err;
-			return  prueba;
+			return  seqReporte;
 		})
 		.then((results) => {
-			var prueba = results;
-			reporte.idReporte = req.body.idReporte; 
-			reporte.idPrueba = req.body.idPrueba;
-			HerramientasPruebas.findOne(
+			secuencia = results.sequenceValue + 1;
+			SeqReportes.findOne(
 				// query
-				{idHerramienta: prueba.idHerramienta},
+				{sequenceName: REPORTE_SEQ},
 				// callback function
-				(err, herramienta) => {
+				(err, seqReporte) => {
 				if (err) 
 					return err;
-				return  herramienta;
+					
+				seqReporte.sequenceValue = secuencia;
+				seqReporte.save(function (err, seqReporte) {
+					if (err) 
+						return err;				
+					return  seqReporte;
+				});	
+			});	
+			var reporte = new Reportes(); // create a new instance of the Reportes model
+			Pruebas.findOne(
+				// query
+				{idPrueba: req.body.idPrueba},
+				// callback function
+				(err, prueba) => {
+					if (err) 
+						return err;
+					return  prueba;
 			})
 			.then((results) => {
-				console.log(results);
-				if(prueba.idHerramienta == HERRAMIENTA_CYPRESS){
-					cypress.run({
-						spec: prueba.rutaArchivo,
-						env:{
-							screen: req.body.idPrueba,
-							}
+				var prueba = results;
+				HerramientasPruebas.findOne(
+					// query
+					{idHerramienta: prueba.idHerramienta},
+					// callback function
+					(err, herramienta) => {
+						if (err) 
+							return err;
+						return  herramienta;
 					})
 					.then((results) => {
-						console.log(results);
-						reporte.urlImagen = req.body.urlImagen;
-						reporte.urlVideo = req.body.urlVideo;
-						reporte.urlLog = req.body.urlLog;	
-						// save the reporte and check for errors
-						reporte.save(function(err) {
-						if (err)
-							res.send(err);
-							res.json({ message: 'reporte creado!' });
-						});
-					});
-				}
-				else if(prueba.idHerramienta == HERRAMIENTA_CYPRESS){
+						var herramienta = results;
+						var nombreScreenshot = "Reporte_" + secuencia + "_prueba_" + req.body.idPrueba + "_";
+						if(prueba.idHerramienta == HERRAMIENTA_CYPRESS){
+							cypress.run({
+								spec: prueba.rutaArchivo,
+								env:{
+									screen: nombreScreenshot,
+								}
+							})
+							.then((results) => {
+
+								var rutaImagenes = [];
+								for(var i=0;i<=results.screenshots - 1;i++){
+									var rutaImagen = herramienta.rutaScreenshots+"/"+nombreScreenshot+(i+1)+".png";
+									rutaImagenes[i] = rutaImagen;
+									shell.cp(rutaImagen, herramienta.rutaImagenes);
+								}
+								
+								reporte.idReporte = secuencia;
+								reporte.idPrueba = req.body.idPrueba;
+								reporte.urlImagen = JSON.stringify(rutaImagenes);
+								reporte.urlVideo = req.body.urlVideo;
+								reporte.urlLog = req.body.urlLog;	
+								reporte.informacion = JSON.stringify(results);
+								// save the reporte and check for errors
+								reporte.save(function(err) {
+								if (err)
+									res.send(err);
+									res.json({ message: 'reporte creado!' });
+								});
+							});
+						}
+						else if(prueba.idHerramienta == HERRAMIENTA_CYPRESS){
 
 
-				}
-				else if(prueba.idHerramienta == LIGHTHOUSE){
+						}
+						else if(prueba.idHerramienta == LIGHTHOUSE){
 
-				}
-			});	
-		});
-    })
+						}
+					});	
+			});
+    	});
+	})	
     .get(function(req, res) {
         Reportes.find(function(err, reportes) {
             if (err)
@@ -222,6 +277,35 @@ router.route('/reportes')
             res.json(reportes);
         });
     });
+
+router.route('/seqpruebas')
+    .post(function(req, res) {
+        var seqPrueba = new SeqPruebas();      // create a new instance of the Reportes model
+        seqPrueba.sequenceValue = req.body.sequenceValue  
+		seqPrueba.sequenceName = req.body.sequenceName;
+        // save the reporte and check for errors
+        seqPrueba.save(function(err) {
+            if (err)
+                res.send(err);
+
+            res.json({ message: 'secuencia de prueba creada!' });
+        });
+    })	
+
+router.route('/seqreportes')
+    .post(function(req, res) {
+        var seqReporte = new SeqReportes();      // create a new instance of the Reportes model
+        seqReporte.sequenceValue = req.body.sequenceValue;
+		seqReporte.sequenceName = req.body.sequenceName;
+        // save the reporte and check for errors
+        seqReporte.save(function(err) {
+            if (err)
+                res.send(err);
+
+            res.json({ message: 'secuencia de reporte creada!' });
+        });
+    })
+
 
 router.route('/ejecutar')
     .post(function(req, res) {

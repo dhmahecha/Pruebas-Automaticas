@@ -10,7 +10,7 @@ var HerramientasPruebasSchema   = new Schema({
     rutaHttpVideos: String,
     rutaFisicaVideos: String,
     rutaImagenes: String,
-    rutaScreenhots: String,
+    rutaScreenshots: String,
     rutaLogs: String,
     comandoEjecucion: String,
     fechaCreacion: { type: Date, default: Date.now }
