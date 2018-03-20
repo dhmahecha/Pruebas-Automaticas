@@ -172,7 +172,7 @@ router.route('/pruebas')
 			prueba.idPrueba = secuencia;  
 			prueba.idHerramienta = req.body.idHerramienta;
 			prueba.idAplicacion = req.body.idAplicacion;
-			prueba.rutaArchivo = req.body.rutaArchivo;
+			prueba.nombreArchivo = req.body.nombreArchivo;
 			// save the prueba and check for errors
 			prueba.save(function(err) {
 				if (err)
