@@ -393,9 +393,8 @@ router.route('/seqreportes')
 // all of our routes will be prefixed with /api
 app.use('/', router);
 app.use('/api', router);
-app.use('/static', express.static(__dirname + '/public'));
+app.use('/public', express.static(__dirname + '/public'));
 app.use('/static', express.static(__dirname + '/node_modules'));
-app.use('/static', express.static(__dirname + '/cypress'));
 
 
 // START THE SERVER
