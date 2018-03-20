@@ -328,6 +328,33 @@ router.route('/reportes')
         });
     });
 
+	router.route('/reportes/:idReporte')
+	.get(function(req, res) {
+		Reportes.findOne(
+			// query
+			{idReporte: req.params.idReporte},
+
+			(err, reporte) => {
+			if (err) 
+				return err;
+			return  res.json(reporte);
+		});
+    });
+
+	router.route('/reportes/pruebas/:idPrueba')
+	.get(function(req, res) {
+		Reportes.findOne(
+			// query
+			{idPrueba: req.params.idPrueba},
+
+			(err, reporte) => {
+			if (err) 
+				return err;
+			return  res.json(reporte);
+		});
+    });
+
+
 router.route('/seqpruebas')
     .post(function(req, res) {
         var seqPrueba = new SeqPruebas();      // create a new instance of the Reportes model
