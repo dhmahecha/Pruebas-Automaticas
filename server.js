@@ -255,6 +255,7 @@ router.route('/reportes')
 							.then((results) => {
 								var herramienta = results;
 								var nombreScreenshot = "Reporte_" + secuencia + "_prueba_" + req.body.idPrueba + "_";
+								var nombreVideo = "Video_" + secuencia + "_prueba_" + req.body.idPrueba;
 								reporte.idReporte = secuencia;
 								reporte.idPrueba = req.body.idPrueba;
 								var rutaConfiguracionArchivo = herramienta.rutaConfiguracion + prueba.nombreArchivo;
@@ -269,6 +270,7 @@ router.route('/reportes')
 									})
 									.then((results) => {
 										var cypress = results;
+										var rutaVideo = "";
 										var rutaImagenes = [];
 										for(var i=0;i<=cypress.screenshots - 1;i++){
 											var rutaScreenshot = herramienta.rutaScreenshots+nombreScreenshot+(i+1)+".png";
@@ -278,12 +280,14 @@ router.route('/reportes')
 										}
 
 										if(cypress.video){
+											rutaVideo = herramienta.rutaHttpVideos+nombreVideo+".mp4";
+											shell.cp('-Rf', herramienta.rutaFisicaVideos+"*.mp4", rutaVideo);
 											//shell.cp(herramienta.rutaFisicaVideos+"/");
 
 										}
 
 										reporte.urlImagen = JSON.stringify(rutaImagenes);
-										reporte.urlVideo = req.body.urlVideo;
+										reporte.urlVideo = rutaVideo;
 										reporte.urlLog = req.body.urlLog;	
 										reporte.informacion = JSON.stringify(cypress);
 										reporte.save(function(err) {
