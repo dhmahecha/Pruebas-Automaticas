@@ -10,10 +10,10 @@ switch ($i) {
         $ruta="cypress/integration/";
         break;
     case 2:
-        $ruta="reportes/nightwatch/";
+        $ruta="nightwatch/";
         break;
     case 3:
-        $ruta="reportes/lighthouse/";
+        $ruta="lighthouse/";
         break;
 }
 

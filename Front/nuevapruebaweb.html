@@ -36,7 +36,7 @@
             $.ajax({
                 url: 'http://ec2-54-190-200-241.us-west-2.compute.amazonaws.com:8080/api/pruebas',
                 type: 'POST',
-                data: 'idHerramienta=' + idherramienta + '&idAplicacion=' + idaplicacion,
+                data: 'idHerramienta=' + idherramienta + '&idAplicacion=' + idaplicacion +'&nombreArchivo='+nombrearchivo,
                 success: function (result) {
                     console.log("Se registró el archivo de pruebas correctamente");
 
@@ -48,8 +48,8 @@
                         processData: false,
                         data: form_data,
                         type: 'post',
-                        success: function (php_script_response) {                            
-                                    
+                        success: function (php_script_response) {
+
                             if (php_script_response.includes("perfecto")) {
                                 console.log("Se subió el archivo de pruebas en php");
                                 alert("La prueba se ha configurado correctamente");
@@ -58,7 +58,7 @@
                                 console.log("error al subir el archivo. mensaje php" + php_script_response); // display response from the PHP script, if any
                                 alert("Error al subir el archivo: " + php_script_response);
                             }
-                            
+
                         }
                     });
 
