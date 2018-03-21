@@ -55,15 +55,19 @@
                             }
 
                             //TODO: Cambiar por consulta dinamica
+
+                            //console.log("APP " + this.idAplicacion);
+                            //console.log(typeof this.idAplicacion);
+
                             var aplicacion = "";
                             switch (this.idAplicacion) {
-                                case "1":
+                                case 1:
                                     aplicacion = "Prestashop (Web)";
                                     break;
-                                case "2":
+                                case 2:
                                     aplicacion = "Calendula (Android)";
                                     break;
-                                case "3":
+                                case 3:
                                     aplicacion = "Car Report (Android)";
                                     break;
                                 default:
@@ -76,6 +80,8 @@
                             result = result + "<td>" + herramienta + "</td>";
                             result = result + "<td>" + aplicacion + "</td>";
                             result = result + "<td>" + this.nombreArchivo + "</td>";
+
+                            console.log(this.nombreArchivo);
                             //result = result + "<td><button data-toggle=\"modal\" data-target=\"#pregunta\" class=\"btn btn-primary\" id=\"" + this.idPrueba + "\">Ejecutar</button></td>";
                             //
                             result = result + "<td><a href=\"#myModal\" data-toggle=\"modal\" id=\"" + this.idPrueba + "\" data-target=\"#edit-modal\">Ejecutar</a></td>";
@@ -95,23 +101,7 @@
                     console.log("Sin datos");
                 }
             });
-        })();
-        /*
-        $('#edit-modal').on('show.bs.modal', function (e) {
-
-            var $modal = $(this),
-                esseyId = e.relatedTarget.id;
-
-            $.ajax({
-                cache: false,
-                type: 'POST',
-                url: 'backend.php',
-                data: 'EID=' + essayId,
-                success: function (data) {
-                    $modal.find('.edit-content').html(data);
-                }
-            });
-        })*/
+        })();        
     </script>
 
 </head>
