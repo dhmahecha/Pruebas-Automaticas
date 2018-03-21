@@ -13,10 +13,100 @@
     <link href="vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <!-- Custom styles for this template-->
     <link href="css/sb-admin.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.3.1.js"
+            integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+            crossorigin="anonymous">
+    </script>
+
+    <script>
+        function uploadAjax() {
+            var file_data = $('#archivo').prop('files')[0];
+            var form_data = new FormData();
+            form_data.append('file', file_data);
+
+            var idaplicacion = $('#aplicacion').val();
+            var idherramienta = $('#herramienta').val();
+            var nombrearchivo = $('#archivo').val().replace(/^.*[\\\/]/, '');
+            //console.log("archivo: " + nombrearchivo);
+
+            form_data.append('herramienta', idherramienta);
+
+            console.log("Data " + form_data);
+
+            $.ajax({
+                url: 'http://ec2-54-190-200-241.us-west-2.compute.amazonaws.com:8080/api/pruebas',
+                type: 'POST',
+                data: 'idHerramienta=' + idherramienta + '&idAplicacion=' + idaplicacion,
+                success: function (result) {
+                    console.log("Se registró el archivo de pruebas correctamente");
+
+                    $.ajax({
+                        url: 'subirarchivo.php', // point to server-side PHP script
+                        dataType: 'text',  // what to expect back from the PHP script, if anything
+                        cache: false,
+                        contentType: false,
+                        processData: false,
+                        data: form_data,
+                        type: 'post',
+                        success: function (php_script_response) {                            
+                                    
+                            if (php_script_response.includes("perfecto")) {
+                                console.log("Se subió el archivo de pruebas en php");
+                                alert("La prueba se ha configurado correctamente");
+                            }
+                            else {
+                                console.log("error al subir el archivo. mensaje php" + php_script_response); // display response from the PHP script, if any
+                                alert("Error al subir el archivo: " + php_script_response);
+                            }
+                            
+                        }
+                    });
+
+
+
+                    //Mostrar mensaje OK
+
+                    //$('#mensaje').html("La prueba ha finalizado correctamente. Diríjase a Reportes para ver los resultados.");
+                    //$('#iniciaprueba').html("      OK      ");
+                    //$('#iniciaprueba').attr("data-dismiss", "modal");
+
+                    //var test = $("input[name=idpruebaejecutar]:hidden").val(0);
+                    //console.log("valor seteado al cerrar: " + $('#idpruebaejecutar').val());
+                }
+            });
+
+
+        }
+
+
+
+        /*
+    $.ajax({
+        url: 'http://ec2-54-190-200-241.us-west-2.compute.amazonaws.com:8080/api/yyy',
+        type: 'POST',
+        data: 'idHerramienta=' + idherramienta + '&idAplicacion=' + idaplicacion,
+        success: function (result) {
+            console.log("la prueba ha finalizado correctamente");
+
+            //Mostrar mensaje OK
+
+            //$('#mensaje').html("La prueba ha finalizado correctamente. Diríjase a Reportes para ver los resultados.");
+            //$('#iniciaprueba').html("      OK      ");
+            //$('#iniciaprueba').attr("data-dismiss", "modal");
+
+            //var test = $("input[name=idpruebaejecutar]:hidden").val(0);
+            //console.log("valor seteado al cerrar: " + $('#idpruebaejecutar').val());
+        }
+    });
+    */
+        /*
+            console.log("finaliza rest BD");
+
+        });*/
+    </script>
 </head>
 
 <body class="fixed-nav sticky-footer bg-dark" id="page-top">
-
     <!--Navegador-->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" id="mainNav">
         <a class="navbar-brand" href="index.html">Xtreme Test</a>
@@ -56,7 +146,7 @@
                         <i class="fa fa-fw fa-table"></i>
                         <span class="nav-link-text">Reportes</span>
                     </a>
-                </li>                               
+                </li>
                 <li class="nav-item" data-toggle="tooltip" data-placement="right" title="general">
                     <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#config" data-parent="#nuevaprueba">
                         <i class="fa fa-fw fa-wrench"></i>
@@ -185,19 +275,41 @@
             </ul>
         </div>
     </nav>
-    
+
     <div class="content-wrapper">
         <div class="container-fluid">
+            <!--Contenido-->
             <!-- Breadcrumbs-->
             <ol class="breadcrumb">
                 <li class="breadcrumb-item active">
-                    <a href="#">Inicio</a>
+                    <a href="#">Nueva Prueba - Aplicación Web</a>
                 </li>
             </ol>
             <div class="row">
-                <div class="col-12">
-                    <h1>Inicio</h1>
-                    <p>Inicio aplicación</p>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="herramienta">Herramienta:</label>
+                        <select class="form-control" id="herramienta">
+                            <option value="0">Seleccione...</option>
+                            <option value="1">Cypress</option>
+                            <option value="2">Nightwatch.js</option>
+                            <option value="3">Lighthouse</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="aplicacion">Aplicación:</label>
+                        <select class="form-control" id="aplicacion">
+                            <option value="0">Seleccione...</option>
+                            <option value="1">Prestashop (Web)</option>
+                            <option value="2">Calendula (Android)</option>
+                            <option value="3">Car Report (Android)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="archivo">Archivo config de prueba:</label>
+                        <input type="file" class="form-control-file" id="archivo">
+                    </div>
+                    <button class="btn btn-primary" id="enviar" onclick="uploadAjax()">Crear</button>
                 </div>
             </div>
         </div>

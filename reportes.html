@@ -13,10 +13,87 @@
     <link href="vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <!-- Custom styles for this template-->
     <link href="css/sb-admin.css" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-3.3.1.js"
+            integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+            crossorigin="anonymous">
+    </script>
+    <script>
+        (function () {
+            $.getJSON("http://ec2-54-190-200-241.us-west-2.compute.amazonaws.com:8080/api/reportes").done(function (data) {
+                if (data) {
+                    if (data.length > 0 && data != "[]") {
+
+                        console.log("Longitud data: " + data.length);
+
+                        //data = $.parseJSON(data);
+                        //console.log(typeof data);
+                        //console.log(data);
+                        var result = "";
+
+                        $(data).each(function () {
+                            result = result + "<tr>";
+                            result = result + "<td>" + this.fechaReporte + "</td>";
+                            result = result + "<td>" + this.idPrueba + "</td>";
+                            result = result + "<td>" + this.idReporte + "</td>";
+
+                            var reporte = "";
+                            if (typeof this.urlReporte === 'string') {
+                                reporte = "<a href=\"http://ec2-54-190-200-241.us-west-2.compute.amazonaws.com:8080/" + this.urlReporte + "\" target=\"_blank\">" + this.urlReporte.replace("public/reportes/lighthouse/", ""); + "</a>";
+                            }
+                            else {
+                                reporte = "N/A";
+                            }
+                            result = result + "<td>" + reporte + "</td>";
+                            
+                            var imagenes = "";
+                            if (typeof this.urlImagen === 'string') {
+                                var jsimagen = JSON.parse(this.urlImagen);
+                                $.each(jsimagen, function (index, value) {
+                                    //imagenes = imagenes + " " + value;
+                                    imagenes = imagenes + "<br>" + "<a href=\"http://ec2-54-190-200-241.us-west-2.compute.amazonaws.com:8080/" + value + "\" target=\"_blank\">" + value.replace("public/imagenes/cypress/", ""); + "</a>";
+                                });
+                            }
+                            result = result + "<td>" + imagenes + "</td>";
+
+                            var info = "";
+                            if (typeof this.informacion === 'string') {
+                                var jsinfo = JSON.parse(this.informacion);
+                                //console.log(jsinfo);
+                                //console.log("duracion " + jsinfo.duration);
+
+                                info = info + "Test: " + jsinfo.tests;
+                                info = info + "<br>Passes: " + jsinfo.passes;
+                                info = info + "<br>Pending: " + jsinfo.pending;
+                                info = info + "<br>Failures: " + jsinfo.failures;
+                                info = info + "<br>Duration: " + jsinfo.duration;
+                                info = info + "<br>Screenshots: " + jsinfo.screenshots;
+                                info = info + "<br>Video: " + jsinfo.video;
+                                info = info + "<br>Version: " + jsinfo.version;
+                            }
+
+                            result = result + "<td>" + info + "</td>";
+                            result = result + "</tr>";
+                        });
+
+                        var fila = $("#dataTable tbody");
+                        fila.append(result);
+                    }
+                    else {
+                        //TODO: Mensaje, sin datos.
+                        console.log("Sin datos");
+                    }
+                }
+                else {
+                    //TODO: Mensaje, sin datos.
+                    console.log("Sin datos");
+                }
+            });
+        })();
+    </script>
 </head>
 
 <body class="fixed-nav sticky-footer bg-dark" id="page-top">
-
     <!--Navegador-->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" id="mainNav">
         <a class="navbar-brand" href="index.html">Xtreme Test</a>
@@ -56,7 +133,7 @@
                         <i class="fa fa-fw fa-table"></i>
                         <span class="nav-link-text">Reportes</span>
                     </a>
-                </li>                               
+                </li>
                 <li class="nav-item" data-toggle="tooltip" data-placement="right" title="general">
                     <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#config" data-parent="#nuevaprueba">
                         <i class="fa fa-fw fa-wrench"></i>
@@ -185,19 +262,40 @@
             </ul>
         </div>
     </nav>
-    
+
+    <!--Contenido-->
     <div class="content-wrapper">
         <div class="container-fluid">
             <!-- Breadcrumbs-->
             <ol class="breadcrumb">
                 <li class="breadcrumb-item active">
-                    <a href="#">Inicio</a>
+                    <a href="#">Reportes</a>
                 </li>
             </ol>
             <div class="row">
-                <div class="col-12">
-                    <h1>Inicio</h1>
-                    <p>Inicio aplicación</p>
+                <div class="col">
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            Listado
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Fecha</th>
+                                            <th>Prueba</th>
+                                            <th>Reporte</th>
+                                            <th>Detalle Reporte</th>
+                                            <th>Imagen</th>
+                                            <th>Información</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

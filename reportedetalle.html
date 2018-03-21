@@ -6,41 +6,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title>Xtreme Test</title>
+    <title>Index</title>
     <!-- Bootstrap core CSS-->
     <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom fonts for this template-->
     <link href="vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <!-- Custom styles for this template-->
     <link href="css/sb-admin.css" rel="stylesheet">
+
+
 </head>
 
 <body class="fixed-nav sticky-footer bg-dark" id="page-top">
 
     <!--Navegador-->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" id="mainNav">
-        <a class="navbar-brand" href="index.html">Xtreme Test</a>
+        <a class="navbar-brand" href="index.html">Pruebamatic 2020</a>
         <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarResponsive">
-            <ul class="navbar-nav navbar-sidenav" id="nuevaprueba">
+            <ul class="navbar-nav navbar-sidenav" id="exampleAccordion">
                 <li class="nav-item" data-toggle="tooltip" data-placement="right" title="NuevaPrueba">
-                    <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#apps" data-parent="#nuevaprueba">
+                    <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#collapseExamplePages" data-parent="#exampleAccordion">
                         <i class="fa fa-fw fa-file"></i>
                         <span class="nav-link-text">Nueva Prueba</span>
                     </a>
-                    <ul class="sidenav-second-level collapse" id="apps">
+                    <ul class="sidenav-second-level collapse" id="collapseExamplePages">
                         <li>
-                            <a href="nuevapruebaweb.html">Aplicación Web</a>
+                            <a href="login.html">Aplicación Web</a>
                         </li>
                         <li>
-                            <a href="#">Android APK</a>
+                            <a href="register.html">Android APK</a>
                         </li>
                     </ul>
                 </li>
                 <li class="nav-item" data-toggle="tooltip" data-placement="right" title="EjecutarPrueba">
-                    <a class="nav-link" href="ejecutarprueba.html">
+                    <a class="nav-link" href="index.html">
                         <i class="fa fa-fw fa-dashboard"></i>
                         <span class="nav-link-text">Ejecutar Pruebas</span>
                     </a>
@@ -52,26 +54,17 @@
                     </a>
                 </li>
                 <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Reportes">
-                    <a class="nav-link" href="reportes.html">
+                    <a class="nav-link" href="tables.html">
                         <i class="fa fa-fw fa-table"></i>
                         <span class="nav-link-text">Reportes</span>
                     </a>
-                </li>                               
-                <li class="nav-item" data-toggle="tooltip" data-placement="right" title="general">
-                    <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#config" data-parent="#nuevaprueba">
+                </li>
+                <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Configuracion">
+                    <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#collapseComponents" data-parent="#exampleAccordion">
                         <i class="fa fa-fw fa-wrench"></i>
                         <span class="nav-link-text">Configuración</span>
                     </a>
-                    <ul class="sidenav-second-level collapse" id="config">
-                        <li>
-                            <a href="configuracion.html">General</a>
-                        </li>
-                        <li>
-                            <a href="aplicaciones.html">Aplicaciones</a>
-                        </li>
-                    </ul>
                 </li>
-
             </ul>
             <ul class="navbar-nav sidenav-toggler">
                 <li class="nav-item">
@@ -185,19 +178,38 @@
             </ul>
         </div>
     </nav>
-    
+
+
     <div class="content-wrapper">
         <div class="container-fluid">
+            <!--Contenido-->            
             <!-- Breadcrumbs-->
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item active">
-                    <a href="#">Inicio</a>
-                </li>
+            <ol class="breadcrumb">                
+                <li class="breadcrumb-item active">Reporte - Aplicación</li>
             </ol>
             <div class="row">
-                <div class="col-12">
-                    <h1>Inicio</h1>
-                    <p>Inicio aplicación</p>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="herramienta">Herramienta:</label>
+                        <select class="form-control" id="herramienta">
+                            <option>Cypress</option>
+                            <option>Nightwatch.js</option>
+                            <option>Lighthouse</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="aplicacion">Aplicación:</label>
+                        <select class="form-control" id="aplicacion">
+                            <option>Prestashop (Web)</option>
+                            <option>Calendula (Android)</option>
+                            <option>Car Report (Android)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="archivo">Archivo config de prueba:</label>
+                        <input type="file" class="form-control-file" id="archivo">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Crear</button>
                 </div>
             </div>
         </div>

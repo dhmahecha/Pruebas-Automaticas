@@ -13,6 +13,48 @@
     <link href="vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <!-- Custom styles for this template-->
     <link href="css/sb-admin.css" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-3.3.1.js"
+            integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+            crossorigin="anonymous">
+    </script>
+    <script>
+        (function () {
+            $.getJSON("http://ec2-54-190-200-241.us-west-2.compute.amazonaws.com:8080/api/aplicaciones").done(function (data) {
+                if (data) {
+                    if (data.length > 0 && data != "[]") {
+
+                        console.log("Longitud data: " + data.length);
+
+                        //data = $.parseJSON(data);
+                        console.log(typeof data);
+                        var result = "";
+
+                        $(data).each(function () {
+                            console.log(this);
+                            result = result + "<tr>";
+                            result = result + "<td>" + this.fechaCreacion + "</td>";                            
+                            result = result + "<td>" + this.idAplicacion + "</td>";
+                            result = result + "<td>" + this.nombreAplicacion + "</td>";
+                            result = result + "<td>" + this.urlAplicacion + "</td>";
+                            result = result + "</tr>";
+                        });
+
+                        var fila = $("#dataTable tbody");
+                        fila.append(result);
+                    }
+                    else {
+                        //TODO: Mensaje, sin datos.
+                        console.log("Sin datos");
+                    }
+                }
+                else {
+                    //TODO: Mensaje, sin datos.
+                    console.log("Sin datos");
+                }
+            });
+        })();
+    </script>
 </head>
 
 <body class="fixed-nav sticky-footer bg-dark" id="page-top">
@@ -56,7 +98,7 @@
                         <i class="fa fa-fw fa-table"></i>
                         <span class="nav-link-text">Reportes</span>
                     </a>
-                </li>                               
+                </li>
                 <li class="nav-item" data-toggle="tooltip" data-placement="right" title="general">
                     <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#config" data-parent="#nuevaprueba">
                         <i class="fa fa-fw fa-wrench"></i>
@@ -185,19 +227,38 @@
             </ul>
         </div>
     </nav>
-    
+
+    <!--Contenido-->
     <div class="content-wrapper">
         <div class="container-fluid">
             <!-- Breadcrumbs-->
             <ol class="breadcrumb">
                 <li class="breadcrumb-item active">
-                    <a href="#">Inicio</a>
+                    <a href="#">Ejecutar Prueba</a>
                 </li>
             </ol>
             <div class="row">
-                <div class="col-12">
-                    <h1>Inicio</h1>
-                    <p>Inicio aplicación</p>
+                <div class="col">
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            Listado
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Fecha</th>
+                                            <th>ID</th>
+                                            <th>Aplicación</th>
+                                            <th>URL / Recurso</th>                                            
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
