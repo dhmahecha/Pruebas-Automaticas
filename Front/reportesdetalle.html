@@ -1,0 +1,414 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Xtreme Test</title>
+    <!-- Bootstrap core CSS-->
+    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom fonts for this template-->
+    <link href="vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <!-- Custom styles for this template-->
+    <link href="css/sb-admin.css" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-3.3.1.js"
+            integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+            crossorigin="anonymous">
+    </script>
+    <script src="js/mdb.js"></script>
+    <script src="js/mdb.min.js"></script>
+
+    <script>
+        (function () {
+            $.getJSON("http://ec2-54-190-200-241.us-west-2.compute.amazonaws.com:8080/api/reportes").done(function (data) {
+                if (data) {
+                    if (data.length > 0 && data != "[]") {
+
+                        console.log("Longitud data: " + data.length);
+
+                        //data = $.parseJSON(data);
+                        //console.log(typeof data);
+                        //console.log(data);
+                        var result = "";
+
+                        $(data).each(function () {
+                            result = result + "<tr>";
+                            result = result + "<td>" + this.fechaReporte + "</td>";
+                            result = result + "<td>" + this.idPrueba + "</td>";
+                            result = result + "<td>" + this.idReporte + "</td>";
+
+                            var reporte = "";
+                            if (typeof this.urlReporte === 'string') {
+                                reporte = "<a href=\"http://ec2-54-190-200-241.us-west-2.compute.amazonaws.com:8080/" + this.urlReporte + "\" target=\"_blank\">" + this.urlReporte.replace("public/reportes/lighthouse/", ""); + "</a>";
+                            }
+                            else {
+                                reporte = "N/A";
+                            }
+                            result = result + "<td>" + reporte + "</td>";
+
+                            var imagenes = "";
+                            if (typeof this.urlImagen === 'string') {
+                                var jsimagen = JSON.parse(this.urlImagen);
+                                $.each(jsimagen, function (index, value) {
+                                    //imagenes = imagenes + " " + value;
+                                    imagenes = imagenes + "<br>" + "<a href=\"http://ec2-54-190-200-241.us-west-2.compute.amazonaws.com:8080/" + value + "\" target=\"_blank\">" + value.replace("public/imagenes/cypress/", ""); + "</a>";
+                                });
+                            }
+                            result = result + "<td>" + imagenes + "</td>";
+
+                            var info = "";
+                            if (typeof this.informacion === 'string') {
+                                var jsinfo = JSON.parse(this.informacion);
+                                //console.log(jsinfo);
+                                //console.log("duracion " + jsinfo.duration);
+
+                                info = info + "Test: " + jsinfo.tests;
+                                info = info + "<br>Passes: " + jsinfo.passes;
+                                info = info + "<br>Pending: " + jsinfo.pending;
+                                info = info + "<br>Failures: " + jsinfo.failures;
+                                info = info + "<br>Duration: " + jsinfo.duration;
+                                info = info + "<br>Screenshots: " + jsinfo.screenshots;
+                                info = info + "<br>Video: " + jsinfo.video;
+                                info = info + "<br>Version: " + jsinfo.version;
+                            }
+
+                            result = result + "<td>" + info + "</td>";
+                            result = result + "</tr>";
+                        });
+
+                        var fila = $("#dataTable tbody");
+                        fila.append(result);
+                    }
+                    else {
+                        //TODO: Mensaje, sin datos.
+                        console.log("Sin datos");
+                    }
+                }
+                else {
+                    //TODO: Mensaje, sin datos.
+                    console.log("Sin datos");
+                }
+            });
+        })();
+    </script>
+</head>
+
+<body class="fixed-nav sticky-footer bg-dark" id="page-top">
+    <!--Navegador-->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" id="mainNav">
+        <a class="navbar-brand" href="index.html">Xtreme Test</a>
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+            <ul class="navbar-nav navbar-sidenav" id="nuevaprueba">
+                <li class="nav-item" data-toggle="tooltip" data-placement="right" title="NuevaPrueba">
+                    <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#apps" data-parent="#nuevaprueba">
+                        <i class="fa fa-fw fa-file"></i>
+                        <span class="nav-link-text">Nueva Prueba</span>
+                    </a>
+                    <ul class="sidenav-second-level collapse" id="apps">
+                        <li>
+                            <a href="nuevapruebaweb.html">Aplicación Web</a>
+                        </li>
+                        <li>
+                            <a href="#">Android APK</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="nav-item" data-toggle="tooltip" data-placement="right" title="EjecutarPrueba">
+                    <a class="nav-link" href="ejecutarprueba.html">
+                        <i class="fa fa-fw fa-dashboard"></i>
+                        <span class="nav-link-text">Ejecutar Pruebas</span>
+                    </a>
+                </li>
+                <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Resultadojecuciones">
+                    <a class="nav-link" href="charts.html">
+                        <i class="fa fa-fw fa-area-chart"></i>
+                        <span class="nav-link-text">Resultados de Ejecuciones</span>
+                    </a>
+                </li>
+                <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Reportes">
+                    <a class="nav-link" href="reportes.html">
+                        <i class="fa fa-fw fa-table"></i>
+                        <span class="nav-link-text">Reportes</span>
+                    </a>
+                </li>
+                <li class="nav-item" data-toggle="tooltip" data-placement="right" title="general">
+                    <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#config" data-parent="#nuevaprueba">
+                        <i class="fa fa-fw fa-wrench"></i>
+                        <span class="nav-link-text">Configuración</span>
+                    </a>
+                    <ul class="sidenav-second-level collapse" id="config">
+                        <li>
+                            <a href="configuracion.html">General</a>
+                        </li>
+                        <li>
+                            <a href="aplicaciones.html">Aplicaciones</a>
+                        </li>
+                    </ul>
+                </li>
+
+            </ul>
+            <ul class="navbar-nav sidenav-toggler">
+                <li class="nav-item">
+                    <a class="nav-link text-center" id="sidenavToggler">
+                        <i class="fa fa-fw fa-angle-left"></i>
+                    </a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle mr-lg-2" id="messagesDropdown" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fa fa-fw fa-envelope"></i>
+                        <span class="d-lg-none">
+                            Messages
+
+                            <span class="badge badge-pill badge-primary">12 New</span>
+                        </span>
+                        <span class="indicator text-primary d-none d-lg-block">
+                            <i class="fa fa-fw fa-circle"></i>
+                        </span>
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="messagesDropdown">
+                        <h6 class="dropdown-header">New Messages:</h6>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#">
+                            <strong>David Miller</strong>
+                            <span class="small float-right text-muted">11:21 AM</span>
+                            <div class="dropdown-message small">Hey there! This new version of SB Admin is pretty awesome! These messages clip off when they reach the end of the box so they don't overflow over to the sides!</div>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#">
+                            <strong>Jane Smith</strong>
+                            <span class="small float-right text-muted">11:21 AM</span>
+                            <div class="dropdown-message small">I was wondering if you could meet for an appointment at 3:00 instead of 4:00. Thanks!</div>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#">
+                            <strong>John Doe</strong>
+                            <span class="small float-right text-muted">11:21 AM</span>
+                            <div class="dropdown-message small">I've sent the final files over to you for review. When you're able to sign off of them let me know and we can discuss distribution.</div>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item small" href="#">View all messages</a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle mr-lg-2" id="alertsDropdown" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fa fa-fw fa-bell"></i>
+                        <span class="d-lg-none">
+                            Alerts
+
+                            <span class="badge badge-pill badge-warning">6 New</span>
+                        </span>
+                        <span class="indicator text-warning d-none d-lg-block">
+                            <i class="fa fa-fw fa-circle"></i>
+                        </span>
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="alertsDropdown">
+                        <h6 class="dropdown-header">New Alerts:</h6>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#">
+                            <span class="text-success">
+                                <strong>
+                                    <i class="fa fa-long-arrow-up fa-fw"></i>Status Update
+                                </strong>
+                            </span>
+                            <span class="small float-right text-muted">11:21 AM</span>
+                            <div class="dropdown-message small">This is an automated server response message. All systems are online.</div>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#">
+                            <span class="text-danger">
+                                <strong>
+                                    <i class="fa fa-long-arrow-down fa-fw"></i>Status Update
+                                </strong>
+                            </span>
+                            <span class="small float-right text-muted">11:21 AM</span>
+                            <div class="dropdown-message small">This is an automated server response message. All systems are online.</div>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#">
+                            <span class="text-success">
+                                <strong>
+                                    <i class="fa fa-long-arrow-up fa-fw"></i>Status Update
+                                </strong>
+                            </span>
+                            <span class="small float-right text-muted">11:21 AM</span>
+                            <div class="dropdown-message small">This is an automated server response message. All systems are online.</div>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item small" href="#">View all alerts</a>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <form class="form-inline my-2 my-lg-0 mr-lg-2">
+                        <div class="input-group">
+                            <input class="form-control" type="text" placeholder="Buscar...">
+                            <span class="input-group-append">
+                                <button class="btn btn-primary" type="button">
+                                    <i class="fa fa-search"></i>
+                                </button>
+                            </span>
+                        </div>
+                    </form>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="modal" data-target="#exampleModal">
+                        <i class="fa fa-fw fa-sign-out"></i>Salir
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!--Contenido-->
+    <div class="content-wrapper">
+        <div class="container-fluid">
+            <!-- Breadcrumbs-->
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item active">
+                    <a href="#">Reportes</a>
+                </li>
+            </ol>
+            <div class="row">
+                <div class="col">
+
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <!-- Example Bar Chart Card-->
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <i class="fa fa-bar-chart"></i> Pruebas Realizadas
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="myBarChart" width="100" height="50"></canvas>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <!-- Example Pie Chart Card-->
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <i class="fa fa-pie-chart"></i> Pruebas Completadas
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="myPieChart" width="100" height="100"></canvas>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /.container-fluid-->
+    <!-- /.content-wrapper-->
+    <footer class="sticky-footer">
+        <div class="container">
+            <div class="text-center">
+                <small>Copyright © Your Website 2018</small>
+            </div>
+        </div>
+    </footer>
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fa fa-angle-up"></i>
+    </a>
+    <!-- Logout Modal-->
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                    <a class="btn btn-primary" href="login.html">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Bootstrap core JavaScript-->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- Core plugin JavaScript-->
+    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+    <!-- Custom scripts for all pages-->
+    <script src="js/sb-admin.min.js"></script>
+
+    <script>
+        var ctx = document.getElementById("myBarChart").getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ["Test", "Passes", "Pending", "Failures", "Duration(seg)", "Screenshots"],
+                datasets: [{
+                    label: '',
+                    data: [12, 19, 3, 5, 2, 3],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 159, 64, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255,99,132,1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+    </script>
+    
+    <script>
+        var ctxP = document.getElementById("myPieChart").getContext('2d');
+        var myPieChart = new Chart(ctxP, {
+            type: 'pie',
+            data: {
+                labels: ["Red", "Green", "Yellow", "Grey", "Dark Grey"],
+                datasets: [
+                    {
+                        data: [300, 50, 100, 40, 120],
+                        backgroundColor: ["#F7464A", "#46BFBD", "#FDB45C", "#949FB1", "#4D5360"],
+                        hoverBackgroundColor: ["#FF5A5E", "#5AD3D1", "#FFC870", "#A8B3C5", "#616774"]
+                    }
+                ]
+            },
+            options: {
+                responsive: true
+            }
+        });
+
+    </script>
+
+
+</body>
+</html>
