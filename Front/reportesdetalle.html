@@ -91,7 +91,7 @@
                     </a>
                 </li>
                 <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Resultadojecuciones">
-                    <a class="nav-link" href="charts.html">
+                    <a class="nav-link" href="reportesdetalle.html">
                         <i class="fa fa-fw fa-area-chart"></i>
                         <span class="nav-link-text">Resultados de Ejecuciones</span>
                     </a>
@@ -280,9 +280,16 @@
                         </div>
                     </div>
 
+                    <div class="row">
+                        <div class="col" id="imagenes">
+
+                        </div>
+                    </div>
+
+
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
     </div>
     <!-- /.container-fluid-->
     <!-- /.content-wrapper-->
@@ -326,8 +333,11 @@
     <script>
 
         $('#herramienta').change(function () {
-            $.getJSON("http://ec2-54-190-200-241.us-west-2.compute.amazonaws.com:8080/api/reportes/pruebas/1").done(function (data) {
-                console.log("Data para 1");
+            var idreporte = $('#herramienta').val();
+            //idreporte = 1;
+
+            $.getJSON("http://ec2-54-190-200-241.us-west-2.compute.amazonaws.com:8080/api/reportes/pruebas/" + idreporte).done(function (data) {
+                console.log("Data para: " + idreporte);
                 console.log(data);
                 console.log(data != "[]");
 
@@ -368,28 +378,29 @@
                         if (typeof data.urlImagen === 'string')
                         {
                             //data.urlImagen split
+
+                            
                             //quitar llaves de abrir y cerrar
+                            var datos = data.urlImagen;
+                            datos = datos.replace("[", "");
+                            datos = datos.replace("]", "");
+                            datos = datos.replace("\"", "");
+                            
+                            datos = datos.split(",");
                             //recorrer cada uno de los pedazos de split
 
-                            for (i = 0; i < data.urlImagen.length; i++) 
+                            for (i = 0; i < datos.length; i++)
                             {
                                 console.log(data.urlImagen[i]);
-                                imagenes = imagenes + "<br>" + "<a href=\"http://ec2-54-190-200-241.us-west-2.compute.amazonaws.com:8080/" + data.urlImagen[i] + "\" target=\"_blank\">" + data.urlImagen[i].replace("public/imagenes/cypress/", ""); + "</a>";
+                                imagenes = imagenes + "<br>" + "<a href=\"http://ec2-54-190-200-241.us-west-2.compute.amazonaws.com:8080/" + datos[i] + "\" target=\"_blank\">" + datos[i].replace("public/imagenes/cypress/", "") + "</a>";
                                 
                             }
                         }
-                        //console.log(imagenes);
+                        console.log(imagenes);
 
-                        /*
-                        if (typeof data.urlImagen === 'string' && data.urlImagen) {
-                            var jsimg = JSON.parse(urlImagen.informacion);
+                        $('#imagenes').html(imagenes);
 
-                            var vtest = "Test: " + jsinfo.tests;
-
-                            imagenes = imagenes + "<br>" + "<a href=\"http://ec2-54-190-200-241.us-west-2.compute.amazonaws.com:8080/" + this + "\" target=\"_blank\">" + this.replace("public/imagenes/cypress/", ""); + "</a>";
-                        }*/
-
-
+                
                         //["public/imagenes/cypress/Reporte_85_prueba_1_1.png", "public/imagenes/cypress/Reporte_85_prueba_1_2.png"]
 
 

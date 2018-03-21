@@ -7,13 +7,13 @@ $ruta="";
 
 switch ($i) {
     case 1:
-        $ruta="public/cypress/integration/";
+        $ruta="cypress/integration/";
         break;
     case 2:
-        $ruta="public/reportes/nightwatch/";
+        $ruta="reportes/nightwatch/";
         break;
     case 3:
-        $ruta="public/reportes/lighthouse/";
+        $ruta="reportes/lighthouse/";
         break;
 }
 
