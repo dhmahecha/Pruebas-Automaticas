@@ -26,18 +26,23 @@ const LIGHTHOUSE = 3;
 
 const PRUEBA_SEQ = "seq_pruebas";
 const REPORTE_SEQ = "seq_reportes";
+const IMAGEN_SEQ = "seq_imagenes";
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+var TiposPruebas = require('./models/tipospruebas'); 
 var HerramientasPruebas    = require('./models/herramientaspruebas'); 
 var Aplicaciones    = require('./models/aplicaciones'); 
+var HerramientasAplicaciones = require('./models/herramientasaplicaciones');
 var Pruebas    = require('./models/pruebas'); 
 var Reportes    = require('./models/reportes'); 
+var Imagenes 	= require('./models/imagenes'); 
 var SeqPruebas    = require('./models/seqpruebas'); 
-var SeqReportes    = require('./models/seqreportes'); 
+var SeqReportes    = require('./models/seqreportes');
+var SeqImagenes    = require('./models/seqimagenes');
 
 const ruta_screenshots = 'cypress/screenshots/';
 const ruta_http_screenshots = 'static/imagenes/';
@@ -81,10 +86,36 @@ const flags = {
 };
 
 
+router.route('/tipospruebas')
+    .post(function(req, res) {
+		var tipospruebas = new TiposPruebas();
+		tipospruebas.idTipoPrueba = req.body.idTipoPrueba;
+		tipospruebas.nombreTipoPrueba = req.body.nombreTipoPrueba;
+
+        // save the tipo de pruebas and check for errors
+        tipospruebas.save(function(err) {
+            if (err)
+                res.send(err);
+
+            res.json({ message: 'Tipo de pruebas creada!' });
+		});
+	})
+	.get(function(req, res) {
+        TiposPruebas.find(function(err, tipospruebas) {
+            if (err)
+                res.send(err);
+
+	    	console.log('Este rest se esta ejecutando.' + tipospruebas); 	
+            res.json(tipospruebas);
+        });
+    });			
+
+
+
 router.route('/herramientaspruebas')
     .post(function(req, res) {
         var herramientaprueba = new HerramientasPruebas();      // create a new instance of the HerramientasPruebas model
-        herramientaprueba.idHerramienta = req.body.idHerramienta;
+		herramientaprueba.idHerramienta = req.body.idHerramienta;
 		herramientaprueba.nombreHerramienta = req.body.nombreHerramienta;
 		herramientaprueba.rutaReportes = req.body.rutaReportes;
 		herramientaprueba.rutaHttpVideos = req.body.rutaHttpVideos;	
@@ -113,11 +144,25 @@ router.route('/herramientaspruebas')
         });
     });
 
+router.route('/herramientaspruebas/tipospruebas/:idTipoPrueba')
+.get(function(req, res) {
+	HerramientasPruebas.find(
+		// query
+		{idTipoPrueba: req.params.idTipoPrueba},
+
+		(err, herramientaspruebas) => {
+		if (err) 
+			return err;
+		return  res.json(herramientaspruebas);
+	});
+});
+
+
 
 router.route('/aplicaciones')
     .post(function(req, res) {
         var aplicacion = new Aplicaciones();      // create a new instance of the Aplicaciones model
-        aplicacion.idAplicacion = req.body.idAplicacion;  
+        aplicacion.idAplicacion = req.body.idAplicacion;
 		aplicacion.nombreAplicacion = req.body.nombreAplicacion;
 		aplicacion.urlAplicacion = req.body.urlAplicacion;
         // save the aplicacion and check for errors
@@ -137,7 +182,51 @@ router.route('/aplicaciones')
 	    	console.log('Este rest se esta ejecutando.' + aplicaciones); 	
             res.json(aplicaciones);
         });
-    });
+	});
+
+	router.route('/herramientasaplicaciones')
+    .post(function(req, res) {
+        var herramientaaplicacion = new HerramientasAplicaciones();      // create a new instance of the HerramientaAplicacion model
+        herramientaaplicacion.idHerramienta = req.body.idHerramienta;
+		herramientaaplicacion.idAplicacion = req.body.idAplicacion;
+        // save the aplicacion and check for errors
+        herramientaaplicacion.save(function(err) {
+            if (err)
+                res.send(err);
+
+            res.json({ message: 'herramienta aplicacion creada!' });
+        });
+
+    })
+	
+	router.route('/aplicaciones/herramientaaplicacion/:idHerramienta')
+	.get(function(req, res) {
+
+		var herramientasAplicaciones = HerramientasAplicaciones.find(
+			// query
+			{idHerramienta: req.params.idHerramienta},
+			(err, herramientaaplicacion) => {
+			if (err) 
+				return err;
+			return  herramientaaplicacion;
+		})
+		.then((results) => {
+			var arrayIdsAplicaciones = new Array();
+			for(i=0;i<results.length;i++){
+				arrayIdsAplicaciones[i] = results[i].idAplicacion;	
+			}
+			var aplicaciones = Aplicaciones.find(
+				// query
+				{idAplicacion: {$in: arrayIdsAplicaciones}},
+				(err, aplicaciones) => {
+					if (err) 
+						res.send(err);
+					return  res.json(aplicaciones);
+
+			});
+		});	
+
+	});
 
 router.route('/pruebas')		
     .post(function(req, res) {
@@ -151,7 +240,7 @@ router.route('/pruebas')
 			return  seqPrueba;
 		})
 		.then((results) => {
-			secuencia = results.sequenceValue + 1;
+			var secuencia = results.sequenceValue + 1;
 			SeqPruebas.findOne(
 				// query
 				{sequenceName: PRUEBA_SEQ},
@@ -203,7 +292,7 @@ router.route('/reportes')
 			return  seqReporte;
 		})
 		.then((results) => {
-			secuencia = results.sequenceValue + 1;
+			var secuencia = results.sequenceValue + 1;
 			SeqReportes.findOne(
 				// query
 				{sequenceName: REPORTE_SEQ},
@@ -272,6 +361,10 @@ router.route('/reportes')
 										var cypress = results;
 										var rutaVideo = "";
 										var rutaImagenes = [];
+										var secuenciaImagen;
+
+
+
 										for(var i=0;i<=cypress.screenshots - 1;i++){
 											var rutaScreenshot = herramienta.rutaScreenshots+nombreScreenshot+(i+1)+".png";
 											var rutaImagen = herramienta.rutaImagenes+nombreScreenshot+(i+1)+".png";
@@ -282,10 +375,50 @@ router.route('/reportes')
 										if(cypress.video){
 											rutaVideo = herramienta.rutaHttpVideos+nombreVideo+".mp4";
 											shell.cp('-Rf', herramienta.rutaFisicaVideos+"*.mp4", rutaVideo);
-											//shell.cp(herramienta.rutaFisicaVideos+"/");
-
 										}
+										
+										i=1;
 
+										rutaImagenes.forEach(function(rutaImagen, i){
+											SeqImagenes.findOne(
+											// query
+												{sequenceName: IMAGEN_SEQ},
+												// callback function
+												(err, seqImagen) => {
+													if (err) 
+														return err;
+													var secuenciaCambio = seqImagen.sequenceValue + i;
+													seqImagen.sequenceValue = secuenciaCambio;
+													seqImagen.save(function (err, seqImagen) {
+														if (err) 
+															return err;	
+														return  seqImagen;
+														});	
+													})
+													.then((results) => {
+														SeqImagenes.findOne(
+															// query
+															{sequenceName: IMAGEN_SEQ},
+															// callback function
+															(err, seqImagen) => {
+																if (err) 
+																	return err;
+																return  seqImagen;
+														})
+														.then((results) => {
+															var imagen = new Imagenes()
+															imagen.idImagen = results.sequenceValue;
+															imagen.urlImagen = rutaImagen;
+															imagen.idReporte = secuencia;
+															imagen.save(function(err) {
+															if (err) 
+																return err;				
+															return  imagen;
+															});
+														});	
+													});		
+												i++;
+										});	
 										reporte.urlImagen = JSON.stringify(rutaImagenes);
 										reporte.urlVideo = rutaVideo;
 										reporte.urlLog = req.body.urlLog;	
@@ -347,7 +480,7 @@ router.route('/reportes')
 
 	router.route('/reportes/pruebas/:idPrueba')
 	.get(function(req, res) {
-		Reportes.findOne(
+		Reportes.find(
 			// query
 			{idPrueba: req.params.idPrueba},
 
@@ -357,6 +490,20 @@ router.route('/reportes')
 			return  res.json(reporte);
 		});
     });
+
+	router.route('/imagenes/reportes/:idReporte')
+	.get(function(req, res) {
+		Imagenes.find(
+			// query
+			{idReporte: req.params.idReporte},
+
+			(err, imagenes) => {
+			if (err) 
+				return err;
+			return  res.json(imagenes);
+		});
+    });
+
 
 
 router.route('/seqpruebas')
@@ -385,7 +532,22 @@ router.route('/seqreportes')
 
             res.json({ message: 'secuencia de reporte creada!' });
         });
+	});
+	
+router.route('/seqimagenes')
+    .post(function(req, res) {
+        var seqImagen = new SeqImagenes();      // create a new instance of the seqimagenes model
+        seqImagen.sequenceValue = req.body.sequenceValue;
+		seqImagen.sequenceName = req.body.sequenceName;
+        // save the sequenceImagen and check for errors
+        seqImagen.save(function(err) {
+            if (err)
+                res.send(err);
+
+            res.json({ message: 'secuencia de imagen creada!' });
+        });
     });
+
 
 // more routes for our API will happen here
 

@@ -5,6 +5,7 @@ var Schema       = mongoose.Schema;
 
 var HerramientasPruebasSchema   = new Schema({
     idHerramienta: Number, 
+    idTipoPrueba: Number,
     nombreHerramienta: String,
     rutaReportes: String,
     rutaHttpVideos: String,
