@@ -13,9 +13,9 @@ var express    = require('express');        // call express
 var app        = express();                 // define our app using express
 var bodyParser = require('body-parser');
 var shell = require('shelljs');
+const compare = require('resemblejs').compare;
 const cypress = require('cypress');
 const fs = require("mz/fs");
-const compare = require('resemblejs').compare;
 const uuidv4 = require('uuid/v4');
 const compareImages = require('resemblejs/compareImages');
 const lighthouse = require('lighthouse');
@@ -27,6 +27,7 @@ const LIGHTHOUSE = 3;
 const PRUEBA_SEQ = "seq_pruebas";
 const REPORTE_SEQ = "seq_reportes";
 const IMAGEN_SEQ = "seq_imagenes";
+const COMPARACION_VISUAL_SEQ = "seq_comparaciones_visuales";
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -40,9 +41,11 @@ var HerramientasAplicaciones = require('./models/herramientasaplicaciones');
 var Pruebas    = require('./models/pruebas'); 
 var Reportes    = require('./models/reportes'); 
 var Imagenes 	= require('./models/imagenes'); 
+var ComparacionesVisuales 	= require('./models/ComparacionesVisuales'); 
 var SeqPruebas    = require('./models/seqpruebas'); 
 var SeqReportes    = require('./models/seqreportes');
 var SeqImagenes    = require('./models/seqimagenes');
+var SeqComparacionesVisuales = require('./models/seqcomparacionesvisuales');
 
 const ruta_screenshots = 'cypress/screenshots/';
 const ruta_http_screenshots = 'static/imagenes/';
@@ -252,8 +255,7 @@ router.route('/pruebas')
 				seqPrueba.sequenceValue = secuencia;
 				seqPrueba.save(function (err, seqPrueba) {
 					if (err) 
-						return err;	
-					console.log("despues " + seqPrueba.sequenceValue);				
+						return err;				
 					return  seqPrueba;
 				});	
 			});
@@ -378,7 +380,6 @@ router.route('/reportes')
 										}
 										
 										i=1;
-
 										rutaImagenes.forEach(function(rutaImagen, i){
 											SeqImagenes.findOne(
 											// query
@@ -465,6 +466,83 @@ router.route('/reportes')
         });
     });
 
+	router.route('/comparacionesvisuales')
+		.post(function(req, res) {	
+			SeqComparacionesVisuales.findOne(
+				// query
+				{sequenceName: COMPARACION_VISUAL_SEQ},
+				// callback function
+				(err, seqComparacionesVisuales) => {
+					if (err) 
+						return err;
+					var secuenciaCambio = seqComparacionesVisuales.sequenceValue + 1;
+					seqComparacionesVisuales.sequenceValue = secuenciaCambio;
+					seqComparacionesVisuales.save(function (err, seqComparacionesVisuales) {
+						if (err) 
+							return err;	
+						return  seqComparacionesVisuales;
+						});	
+					})
+					.then((results) => {
+						SeqComparacionesVisuales.findOne(
+							// query
+							{sequenceName: COMPARACION_VISUAL_SEQ},
+							// callback function
+							(err, seqComparacionesVisuales) => {
+								if (err) 
+									return err;
+								return  seqComparacionesVisuales;
+							})
+							.then((results) => {
+								var comparacionVisual = new ComparacionesVisuales();
+								comparacionVisual.idComparacionVisual = results.sequenceValue;
+								
+								Imagenes.findOne(
+									// query
+									{idImagen: req.body.idImagen1},
+						
+									(err, imagen) => {
+									if (err) 
+										return err;
+									return  imagen;
+								})
+								.then((results) => {
+									var rutaImagen1 = results.urlImagen;
+									Imagenes.findOne(
+										// query
+										{idImagen: req.body.idImagen2},
+							
+										(err, imagen) => {
+										if (err) 
+											return err;
+										return  imagen;
+									})
+									.then((results) => {
+										const options = {};
+										var rutaImagen2 = results.urlImagen;
+										console.log(rutaImagen1);
+										console.log(rutaImagen2);
+										compare(rutaImagen1, rutaImagen2, options, function (err, data) {
+											if (err) {
+												console.log('Ha ocurrido un error!' + err)
+											} else {
+												var rutaSalidaFisica = rutaImagenes + "resemblejs/salida.png";
+												fs.writeFile(rutaSalidaFisica, data.getBuffer());
+											}	
+										});	
+										comparacionVisual.idImagen1 = req.body.idImagen1;
+										comparacionVisual.idImagen2 = req.body.idImagen2;
+										comparacionVisual.save(function(err) {
+											if (err) 
+												res.send(err);			
+											return  res.json({ message: 'Comparación visual creada!' });
+										});									
+									});	
+								});	
+							});	
+					});	
+		});	
+
 	router.route('/reportes/:idReporte')
 	.get(function(req, res) {
 		Reportes.findOne(
@@ -473,7 +551,7 @@ router.route('/reportes')
 
 			(err, reporte) => {
 			if (err) 
-				return err;
+				res.send(err);
 			return  res.json(reporte);
 		});
     });
@@ -486,10 +564,23 @@ router.route('/reportes')
 
 			(err, reporte) => {
 			if (err) 
-				return err;
+				res.send(err);
 			return  res.json(reporte);
 		});
-    });
+	});
+	
+	router.route('/imagenes/:idImagen')
+	.get(function(req, res) {
+		Imagenes.findOne(
+			// query
+			{idImagen: req.params.idImagen},
+
+			(err, imagen) => {
+			if (err) 
+				res.send(err);
+			return  res.json(imagen);
+		});
+    });	
 
 	router.route('/imagenes/reportes/:idReporte')
 	.get(function(req, res) {
@@ -499,12 +590,23 @@ router.route('/reportes')
 
 			(err, imagenes) => {
 			if (err) 
-				return err;
+				return res.send(err);
 			return  res.json(imagenes);
 		});
     });
 
+	router.route('/comparacionesvisuales/:idImagen1/:idImagen2')
+	.get(function(req, res) {
+		ComparacionesVisuales.find(
+			// query
+			{idImagen1: req.params.idImagen1, idImagen2: req.params.idImagen2},
 
+			(err, comparacionVisual) => {
+			if (err) 
+				return res.send(err);
+			return  res.json(comparacionVisual);
+		});
+    });
 
 router.route('/seqpruebas')
     .post(function(req, res) {
@@ -548,8 +650,27 @@ router.route('/seqimagenes')
         });
     });
 
+router.route('/seqcomparacionesvisuales')
+    .post(function(req, res) {
+        var seqcomparacionesvisuales = new SeqComparacionesVisuales();      // create a new instance of the seqimagenes model
+        seqcomparacionesvisuales.sequenceValue = req.body.sequenceValue;
+		seqcomparacionesvisuales.sequenceName = req.body.sequenceName;
+        // save the sequenceImagen and check for errors
+        seqcomparacionesvisuales.save(function(err) {
+            if (err)
+                res.send(err);
+
+            res.json({ message: 'secuencia de comparación creada!' });
+        });
+    });	
 
 // more routes for our API will happen here
+app.use(function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', "*");
+    res.header('Access-Control-Allow-Methods','GET,PUT,POST,DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    next();
+})
 
 // REGISTER OUR ROUTES -------------------------------
 // all of our routes will be prefixed with /api
