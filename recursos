@@ -1,0 +1,25 @@
+/api/herramientaspruebas GET ->  Obtener todo el listado de herramientas
+/api/aplicaciones GET -> Obtener el listado de aplicaciones
+/api/pruebas POST -> Guardar prueba con el botón guardar
+/api/pruebas GET -> Obtener el listado de pruebas 
+/api/reportes POST -> Guardar reporte con el botón ejecutar 
+
+
+/api/tipospruebas GET ->  Obtener el listado de tipos de pruebas
+/api/herramientaspruebas/tipospruebas/:idTipoPrueba GET -> Obtener el listado de herramientas por tipo de prueba
+/api/aplicaciones/herramientaaplicacion/:idHerramienta GET -> Obtener el listado de aplicaciones disponibles para una herramienta
+/api/pruebas POST -> Guardar prueba con el botón guardar
+/api/pruebas GET -> Obtener el listado de pruebas 
+/api/reportes POST -> Guardar reporte con el botón ejecutar 
+/api/reportes/pruebas/1 GET ->  Obtener el listado de reportes por prueba
+/api/reportes/72 GET -> Obtener un reporte para ver el detalle
+/api/imagenes/reportes/:idReporte GET -> Obtener las imágenes disponibles para un reporte
+/api/comparacionesvisuales POST -> compara dos imágenes: deben pasarse los ids de las imágenes a comparar 
+ejemplo:
+{
+    "idImagen1": 52,
+    "idImagen2": 53
+}
+/api/comparacionesvisuales/:idImagen1/:idImagen2 GET -> obtiene la imagen el resultado de las dos imagines comparadas
+
+
