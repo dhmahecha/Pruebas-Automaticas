@@ -41,7 +41,7 @@ var HerramientasAplicaciones = require('./models/herramientasaplicaciones');
 var Pruebas    = require('./models/pruebas'); 
 var Reportes    = require('./models/reportes'); 
 var Imagenes 	= require('./models/imagenes'); 
-var ComparacionesVisuales 	= require('./models/ComparacionesVisuales'); 
+var ComparacionesVisuales 	= require('./models/comparacionesvisuales'); 
 var SeqPruebas    = require('./models/seqpruebas'); 
 var SeqReportes    = require('./models/seqreportes');
 var SeqImagenes    = require('./models/seqimagenes');
@@ -388,7 +388,9 @@ router.route('/reportes')
 												(err, seqImagen) => {
 													if (err) 
 														return err;
+
 													var secuenciaCambio = seqImagen.sequenceValue + i;
+													console.log(secuenciaCambio);
 													seqImagen.sequenceValue = secuenciaCambio;
 													seqImagen.save(function (err, seqImagen) {
 														if (err) 
