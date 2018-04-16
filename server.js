@@ -492,15 +492,17 @@ router.route('/reportes')
 								var nombreImagen = "ComparacionVisual_" + secuencia + ".png";
 								var rutaSalidaFisica = rutaImagenes + "resemblejs/" + nombreImagen;
 								fs.writeFile(rutaSalidaFisica, data.getBuffer());
+								comparacionVisual.idImagen1 = req.body.idImagen1;
+								comparacionVisual.idImagen2 = req.body.idImagen2;
+								comparacionVisual.rutaImagenComparacion = rutaSalidaFisica;
+								comparacionVisual.save(function(err) {
+								if (err) 
+									res.send(err);			
+								return  res.json({ message: 'Comparación visual creada!' });
+								});									
 							}	
 						});	
-						comparacionVisual.idImagen1 = req.body.idImagen1;
-						comparacionVisual.idImagen2 = req.body.idImagen2;
-						comparacionVisual.save(function(err) {
-						if (err) 
-							res.send(err);			
-						return  res.json({ message: 'Comparación visual creada!' });
-						});									
+								
 					});	
 				});	
 			});	
