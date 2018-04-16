@@ -14,6 +14,7 @@ var app        = express();                 // define our app using express
 var bodyParser = require('body-parser');
 var shell = require('shelljs');
 const compare = require('resemblejs').compare;
+var async = require('async');
 const cypress = require('cypress');
 const fs = require("mz/fs");
 const uuidv4 = require('uuid/v4');
@@ -23,6 +24,7 @@ const chromeLauncher = require('chrome-launcher');
 const HERRAMIENTA_CYPRESS = 1;
 const NYGTHWATCH = 2;
 const LIGHTHOUSE = 3;
+const MUTODE = 4;
 
 const PRUEBA_SEQ = "seq_pruebas";
 const REPORTE_SEQ = "seq_reportes";
@@ -127,6 +129,7 @@ router.route('/herramientaspruebas')
 		herramientaprueba.rutaScreenhots = req.body.rutaScreenhots;		
 		herramientaprueba.rutaLogs = req.body.rutaLogs;
 		herramientaprueba.comandoEjecucion = req.body.comandoEjecucion;
+		herramientaprueba.rutaConfiguracion = req.body.rutaConfiguracion;		
 
         // save the herramienta de pruebas and check for errors
         herramientaprueba.save(function(err) {
@@ -365,8 +368,6 @@ router.route('/reportes')
 										var rutaImagenes = [];
 										var secuenciaImagen;
 
-
-
 										for(var i=0;i<=cypress.screenshots - 1;i++){
 											var rutaScreenshot = herramienta.rutaScreenshots+nombreScreenshot+(i+1)+".png";
 											var rutaImagen = herramienta.rutaImagenes+nombreScreenshot+(i+1)+".png";
@@ -378,49 +379,26 @@ router.route('/reportes')
 											rutaVideo = herramienta.rutaHttpVideos+nombreVideo+".mp4";
 											shell.cp('-Rf', herramienta.rutaFisicaVideos+"*.mp4", rutaVideo);
 										}
-										
-										i=1;
 										rutaImagenes.forEach(function(rutaImagen, i){
-											SeqImagenes.findOne(
-											// query
+											SeqImagenes.findOneAndUpdate(
 												{sequenceName: IMAGEN_SEQ},
-												// callback function
-												(err, seqImagen) => {
+												{ "$inc": { "sequenceValue": 1 } },
+												function(err,seqImagen) {
 													if (err) 
 														return err;
-
-													var secuenciaCambio = seqImagen.sequenceValue + i;
-													console.log(secuenciaCambio);
-													seqImagen.sequenceValue = secuenciaCambio;
-													seqImagen.save(function (err, seqImagen) {
-														if (err) 
-															return err;	
-														return  seqImagen;
-														});	
-													})
-													.then((results) => {
-														SeqImagenes.findOne(
-															// query
-															{sequenceName: IMAGEN_SEQ},
-															// callback function
-															(err, seqImagen) => {
-																if (err) 
-																	return err;
-																return  seqImagen;
-														})
-														.then((results) => {
-															var imagen = new Imagenes()
-															imagen.idImagen = results.sequenceValue;
-															imagen.urlImagen = rutaImagen;
-															imagen.idReporte = secuencia;
-															imagen.save(function(err) {
-															if (err) 
-																return err;				
-															return  imagen;
-															});
-														});	
-													});		
-												i++;
+											   
+												}
+											).then((results) => {
+												var imagen = new Imagenes();
+												imagen.idImagen = results.sequenceValue;
+												imagen.urlImagen = rutaImagen;
+												imagen.idReporte = secuencia;
+												imagen.save(function(err) {
+												if (err) 
+													return err;				
+												return  imagen;	
+												});	
+											});	
 										});	
 										reporte.urlImagen = JSON.stringify(rutaImagenes);
 										reporte.urlVideo = rutaVideo;
@@ -433,10 +411,6 @@ router.route('/reportes')
 										});										
 										// save the reporte and check for errors
 									});
-								}
-								else if(prueba.idHerramienta == HERRAMIENTA_CYPRESS){
-
-
 								}
 								else if(prueba.idHerramienta == LIGHTHOUSE){
 									/*launchChromeAndRunLighthouse(aplicacion.urlAplicacion, flags).then(results => {
@@ -455,6 +429,11 @@ router.route('/reportes')
 									res.json({ message: 'reporte creado!' });
 									});									
 								}
+								else if(prueba.idHerramienta == MUTODE){
+
+									console.log("Mutode");
+								}
+
 							});	
 					});				
 			});
@@ -469,80 +448,62 @@ router.route('/reportes')
     });
 
 	router.route('/comparacionesvisuales')
-		.post(function(req, res) {	
-			SeqComparacionesVisuales.findOne(
-				// query
+		.post(function(req, res) {
+			SeqComparacionesVisuales.findOneAndUpdate(
 				{sequenceName: COMPARACION_VISUAL_SEQ},
-				// callback function
-				(err, seqComparacionesVisuales) => {
+				{ "$inc": { "sequenceValue": 1 } },
+				function(err,seqComparacionesVisuales) {
 					if (err) 
 						return err;
-					var secuenciaCambio = seqComparacionesVisuales.sequenceValue + 1;
-					seqComparacionesVisuales.sequenceValue = secuenciaCambio;
-					seqComparacionesVisuales.save(function (err, seqComparacionesVisuales) {
+				return seqComparacionesVisuales;
+				}
+			)
+			.then((results) => {
+				console.log(results);
+				var comparacionVisual = new ComparacionesVisuales();
+				var secuencia = results.sequenceValue;
+				comparacionVisual.idComparacionVisual = secuencia;
+								
+				Imagenes.findOne(
+					// query
+					{idImagen: req.body.idImagen1},					
+					(err, imagen) => {
 						if (err) 
-							return err;	
-						return  seqComparacionesVisuales;
-						});	
+							return err;
+						return  imagen;
+				})
+				.then((results) => {
+					var rutaImagen1 = results.urlImagen;
+					Imagenes.findOne(
+						// query
+						{idImagen: req.body.idImagen2},						
+						(err, imagen) => {
+						if (err) 
+							return err;
+						return  imagen;
 					})
 					.then((results) => {
-						SeqComparacionesVisuales.findOne(
-							// query
-							{sequenceName: COMPARACION_VISUAL_SEQ},
-							// callback function
-							(err, seqComparacionesVisuales) => {
-								if (err) 
-									return err;
-								return  seqComparacionesVisuales;
-							})
-							.then((results) => {
-								var comparacionVisual = new ComparacionesVisuales();
-								comparacionVisual.idComparacionVisual = results.sequenceValue;
-								
-								Imagenes.findOne(
-									// query
-									{idImagen: req.body.idImagen1},
-						
-									(err, imagen) => {
-									if (err) 
-										return err;
-									return  imagen;
-								})
-								.then((results) => {
-									var rutaImagen1 = results.urlImagen;
-									Imagenes.findOne(
-										// query
-										{idImagen: req.body.idImagen2},
-							
-										(err, imagen) => {
-										if (err) 
-											return err;
-										return  imagen;
-									})
-									.then((results) => {
-										const options = {};
-										var rutaImagen2 = results.urlImagen;
-										console.log(rutaImagen1);
-										console.log(rutaImagen2);
-										compare(rutaImagen1, rutaImagen2, options, function (err, data) {
-											if (err) {
-												console.log('Ha ocurrido un error!' + err)
-											} else {
-												var rutaSalidaFisica = rutaImagenes + "resemblejs/salida.png";
-												fs.writeFile(rutaSalidaFisica, data.getBuffer());
-											}	
-										});	
-										comparacionVisual.idImagen1 = req.body.idImagen1;
-										comparacionVisual.idImagen2 = req.body.idImagen2;
-										comparacionVisual.save(function(err) {
-											if (err) 
-												res.send(err);			
-											return  res.json({ message: 'Comparación visual creada!' });
-										});									
-									});	
-								});	
-							});	
+						const options = {};
+						var rutaImagen2 = results.urlImagen;
+						compare(rutaImagen1, rutaImagen2, options, function (err, data) {
+							if (err) {
+								console.log('Ha ocurrido un error!' + err)
+							} else {
+								var nombreImagen = "ComparacionVisual_" + secuencia + ".png";
+								var rutaSalidaFisica = rutaImagenes + "resemblejs/" + nombreImagen;
+								fs.writeFile(rutaSalidaFisica, data.getBuffer());
+							}	
+						});	
+						comparacionVisual.idImagen1 = req.body.idImagen1;
+						comparacionVisual.idImagen2 = req.body.idImagen2;
+						comparacionVisual.save(function(err) {
+						if (err) 
+							res.send(err);			
+						return  res.json({ message: 'Comparación visual creada!' });
+						});									
 					});	
+				});	
+			});	
 		});	
 
 	router.route('/reportes/:idReporte')
