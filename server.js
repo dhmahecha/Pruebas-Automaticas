@@ -431,7 +431,7 @@ router.route('/reportes')
 									var nombreLog = "Log_reporte_" + secuencia + "_prueba_" + req.body.idPrueba + ".log";
 									shell.cd("mutode/");
 									shell.exec(herramienta.comandoEjecucion);
-									shell.mv(".mutode/*.log" ,  "../"+herramienta.rutaLogs+nombreLog);
+									shell.mv(".mutode/mutants*.log" ,  "../"+herramienta.rutaLogs+nombreLog);
 									reporte.urlLog = herramienta.rutaLogs + nombreLog;
 									reporte.save(function(err) {
 										if (err)
