@@ -8,6 +8,7 @@ var ComparacionesVisualesSchema   = new Schema({
     idImagen1: Number,
     idImagen2: Number,
     rutaImagenComparacion: String,
+    informacion: String,
     fechaCreacion: { type: Date, default: Date.now }
 });
 

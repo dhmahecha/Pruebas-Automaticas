@@ -6,7 +6,6 @@ var Schema       = mongoose.Schema;
 var ReportesSchema   = new Schema({
     idReporte: Number,
     idPrueba: Number,
-    urlImagen: String,
     urlVideo: String,
     urlLog: String,
     urlReporte: String,

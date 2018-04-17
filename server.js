@@ -348,8 +348,8 @@ router.route('/reportes')
 							})
 							.then((results) => {
 								var herramienta = results;
-								var nombreScreenshot = "Reporte_" + secuencia + "_prueba_" + req.body.idPrueba + "_";
-								var nombreVideo = "Video_" + secuencia + "_prueba_" + req.body.idPrueba;
+								var nombreScreenshot = "Imagen_reporte_" + secuencia + "_prueba_" + req.body.idPrueba + "_";
+								var nombreVideo = "Video_reporte" + secuencia + "_prueba_" + req.body.idPrueba;
 								reporte.idReporte = secuencia;
 								reporte.idPrueba = req.body.idPrueba;
 								var rutaConfiguracionArchivo = herramienta.rutaConfiguracion + prueba.nombreArchivo;
@@ -400,14 +400,13 @@ router.route('/reportes')
 												});	
 											});	
 										});	
-										reporte.urlImagen = JSON.stringify(rutaImagenes);
 										reporte.urlVideo = rutaVideo;
 										reporte.urlLog = req.body.urlLog;	
 										reporte.informacion = JSON.stringify(cypress);
 										reporte.save(function(err) {
 										if (err)
 											res.send(err);
-										res.json({ message: 'reporte creado!' });
+										res.json({ message: 'reporte de cypress creado!' });
 										});										
 										// save the reporte and check for errors
 									});
@@ -420,18 +419,25 @@ router.route('/reportes')
 
 									var comando = herramienta.comandoEjecucion  + rutaConfiguracionArchivo + " " + aplicacion.urlAplicacion;
 									var nombreReporte = "Reporte_" + secuencia + "_prueba_" + req.body.idPrueba + ".html";
-									console.log(comando + " --output-path " + herramienta.rutaReportes + nombreReporte);
 									shell.exec(comando + " --output-path " + herramienta.rutaReportes + nombreReporte) + " -output html";
 									reporte.urlReporte = herramienta.rutaReportes + nombreReporte;
 									reporte.save(function(err) {
 									if (err)
 										res.send(err);
-									res.json({ message: 'reporte creado!' });
+									res.json({ message: 'reporte de lighthouse creado!' });
 									});									
 								}
 								else if(prueba.idHerramienta == MUTODE){
-
-									console.log("Mutode");
+									var nombreLog = "Log_reporte_" + secuencia + "_prueba_" + req.body.idPrueba + ".log";
+									shell.cd("mutode/");
+									shell.exec(herramienta.comandoEjecucion);
+									shell.mv(".mutode/*.log" ,  "../"+herramienta.rutaLogs+nombreLog);
+									reporte.urlLog = herramienta.rutaLogs + nombreLog;
+									reporte.save(function(err) {
+										if (err)
+											res.send(err);
+										res.json({ message: 'reporte de mutode creado!' });
+									});	
 								}
 
 							});	
@@ -495,6 +501,7 @@ router.route('/reportes')
 								comparacionVisual.idImagen1 = req.body.idImagen1;
 								comparacionVisual.idImagen2 = req.body.idImagen2;
 								comparacionVisual.rutaImagenComparacion = rutaSalidaFisica;
+								comparacionVisual.informacion = JSON.stringify(data);
 								comparacionVisual.save(function(err) {
 								if (err) 
 									res.send(err);			
