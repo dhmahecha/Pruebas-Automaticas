@@ -20,6 +20,12 @@ ejemplo:
     "idImagen1": 52,
     "idImagen2": 53
 }
-/api/comparacionesvisuales/:idImagen1/:idImagen2 GET -> obtiene la imagen el resultado de las dos imagines comparadas
+/api/comparacionesvisuales/:idImagen1/:idImagen2 GET -> obtiene la imagen resultado de las dos imagines comparadas
+
+GET
+Este recurso /api/herramientaspruebas/tipospruebas/:idTipoPrueba   este recurso /api/herramientaspruebas
+GET
+Este recurso /api/aplicaciones/herramientaaplicacion/:idHerramienta remplaza este recurso  /api/aplicaciones
+
 
 
