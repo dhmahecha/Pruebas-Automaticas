@@ -3,4 +3,8 @@
 module.exports = require("./app/prestashop/js/tools.js");
 module.exports = require("./app/prestashop/js/validate.js");
 module.exports = require("./app/prestashop/js/date.js");
+module.exports = require("./app/prestashop/js/admin.js");
+module.exports = require("./app/prestashop/js/admin-categories-tree.js");
+module.exports = require("./app/prestashop/js/cldr.js");
+
 
