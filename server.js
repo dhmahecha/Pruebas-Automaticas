@@ -455,6 +455,8 @@ router.route('/reportes')
 
 	router.route('/comparacionesvisuales')
 		.post(function(req, res) {
+			console.log(req.body.idImagen1);
+			console.log(req.body.idImagen2);
 			SeqComparacionesVisuales.findOneAndUpdate(
 				{sequenceName: COMPARACION_VISUAL_SEQ},
 				{ "$inc": { "sequenceValue": 1 } },
