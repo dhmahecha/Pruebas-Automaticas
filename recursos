@@ -29,3 +29,14 @@ Este recurso /api/aplicaciones/herramientaaplicacion/:idHerramienta remplaza est
 
 
 
+
+/api/tipospruebas GET
+/api/herramientaspruebas/tipospruebas/:idTipoPrueba
+/api/aplicaciones/herramientaaplicacion/:idHerramienta
+/api/pruebas POST
+/api/pruebas GET
+/api/reportes POST
+/api/reportes/pruebas/1 GET
+/api/reportes/72 GET
+/api/imagenes/reportes/:idReporte GET
+/api/comparacionesvisuales POST

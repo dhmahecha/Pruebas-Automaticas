@@ -479,6 +479,7 @@ router.route('/reportes')
 						return  imagen;
 				})
 				.then((results) => {
+					console.log('resultados imagen 1:' + results);
 					var rutaImagen1 = results.urlImagen;
 					Imagenes.findOne(
 						// query
@@ -489,6 +490,7 @@ router.route('/reportes')
 						return  imagen;
 					})
 					.then((results) => {
+						console.log('resultados imagen 2:' + results);
 						const options = {};
 						var rutaImagen2 = results.urlImagen;
 						compare(rutaImagen1, rutaImagen2, options, function (err, data) {
