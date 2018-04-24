@@ -5,8 +5,7 @@ var Schema       = mongoose.Schema;
 
 var PruebasSchema   = new Schema({
     idPrueba: Number,
-    idHerramienta: Number,
-    idAplicacion: Number,
+    idHerramientaAplicacion: Number,
     nombreArchivo: String,
     fechaPrueba: { type: Date, default: Date.now }
 });
