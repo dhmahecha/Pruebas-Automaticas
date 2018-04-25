@@ -1,40 +1,117 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="">
-
     <title>Xtreme Test V3</title>
-
     <!-- Bootstrap Core CSS -->
     <link href="/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-
     <!-- MetisMenu CSS -->
     <link href="/vendor/metisMenu/metisMenu.min.css" rel="stylesheet">
-
     <!-- Custom CSS -->
     <link href="/dist/css/sb-admin-2.css" rel="stylesheet">
-
     <!-- Morris Charts CSS -->
     <link href="/vendor/morrisjs/morris.css" rel="stylesheet">
-
     <!-- Custom Fonts -->
     <link href="/vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
-
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
         <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
         <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
+    <script type="text/javascript" src="/js/config.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.js"
+            integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+            crossorigin="anonymous">
+    </script>
 
+    <!--TODO: Ver la diferencia entre este boostrap y el de arriba-->
+    <script data-require="bootstrap@*" data-semver="3.1.1" src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+
+
+    <script>
+        (function () {
+            $.getJSON(globalVariable.url_json + "/api/pruebas").done(function (data) {
+                if (data) {
+                    if (data.length > 0 && data != "[]") {
+
+                        //console.log("Longitud data: " + data.length);
+
+                        //data = $.parseJSON(data);
+                        //console.log(typeof data);
+                        var result = "";
+
+                        $(data).each(function () {
+                            //console.log(this);
+
+                            //TODO: Cambiar por consulta dinamica
+                            var herramienta = "";
+                            switch (this.idHerramienta) {
+                                case 1:
+                                    herramienta = "Cypress";
+                                    break;
+                                case 2:
+                                    herramienta = "Nightwatch.js";
+                                    break;
+                                case 3:
+                                    herramienta = "Lighthouse";
+                                    break;
+                                default:
+                                    herramienta = "N/A";
+                            }
+
+                            //TODO: Cambiar por consulta dinamica
+
+                            //console.log("APP " + this.idAplicacion);
+                            //console.log(typeof this.idAplicacion);
+
+                            var aplicacion = "";
+                            switch (this.idAplicacion) {
+                                case 1:
+                                    aplicacion = "Prestashop (Web)";
+                                    break;
+                                case 2:
+                                    aplicacion = "Calendula (Android)";
+                                    break;
+                                case 3:
+                                    aplicacion = "Car Report (Android)";
+                                    break;
+                                default:
+                                    aplicacion = "N/A";
+                            }
+
+                            result = result + "<tr>";
+                            result = result + "<td>" + this.fechaPrueba + "</td>";
+                            result = result + "<td>" + this.idPrueba + "</td>";
+                            result = result + "<td>" + herramienta + "</td>";
+                            result = result + "<td>" + aplicacion + "</td>";
+                            result = result + "<td>" + this.nombreArchivo + "</td>";
+
+                            console.log(this.nombreArchivo);
+                            //result = result + "<td><button data-toggle=\"modal\" data-target=\"#pregunta\" class=\"btn btn-primary\" id=\"" + this.idPrueba + "\">Ejecutar</button></td>";
+                            //
+                            result = result + "<td><a href=\"#myModal\" data-toggle=\"modal\" id=\"" + this.idPrueba + "\" data-target=\"#edit-modal\">Ejecutar</a></td>";
+                            result = result + "</tr>";
+                        });
+
+                        var fila = $("#dataTable tbody");
+                        fila.append(result);
+                    }
+                    else {
+                        //TODO: Mensaje, sin datos.
+                        console.log("Sin datos");
+                    }
+                }
+                else {
+                    //TODO: Mensaje, sin datos.
+                    console.log("Sin datos");
+                }
+            });
+        })();
+    </script>
 </head>
-
 <body>
     <div id="wrapper">
         <!-- Navigation -->
@@ -175,7 +252,6 @@
                         <li>
                             <a href="reportesdetalle.html"><i class="fa fa-fw fa-area-chart"></i>Resultados de Ejecuciones</a>
                         </li>
-
                         <li>
                             <a href="reportes.html"><i class="fa fa-fw fa-table"></i>Métodos de Análisis</a>
                         </li>
@@ -198,41 +274,115 @@
             </div>
             <!--Menu lateral Fin-->
         </nav>
-
+        <!--Contenido Pagina Inicio-->
         <div id="page-wrapper">
             <div class="row">
                 <div class="col-lg-12">
-                    <h1 class="page-header">Xtreme Test V3.0</h1>
+                    <h4 class="page-header">Ejecutar Prueba</h4>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-lg-12">
-                    <h3>Diana Espitia</h3>
-                    <h3>Diego Mahecha</h3>
-                    <h3>Fabio Bolívar</h3>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                Listado
+                            </div>
+                            <div class="panel-body">
+                                <table width="100%" class="table table-striped table-bordered table-hover" id="dataTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Fecha</th>
+                                            <th>Id</th>
+                                            <th>Herramienta Pruebas</th>
+                                            <th>Aplicación</th>
+                                            <th>Archivo de Pruebas</th>
+                                            <th>&nbsp;</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <!-- /#page-wrapper -->
+        <!--Contenido Pagina Fin-->
     </div>
     <!-- /#wrapper -->
+    <!--boton confirmacion-->
+
+    <div id="edit-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ejemplopregunta">Desea ejecutar la prueba?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Cerrar">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body edit-content" id="mensaje">
+                    Al hacer clic en "Iniciar", se realizará una nueva prueba a la aplicación
+                </div>
+                <div hidden="hidden">
+                    <input type="hidden" name="idpruebaejecutar" id="idpruebaejecutar" value="0" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="iniciaprueba">Iniciar Prueba</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $('#edit-modal').on('show.bs.modal', function (e) {
+            var $modal = $(this),
+                pruebaId = e.relatedTarget.id;
+
+            console.log("prueba seleccionada: " + pruebaId);
+            var test = $("input[name=idpruebaejecutar]:hidden").val(pruebaId);
+            console.log("valor seteado: " + $('#idpruebaejecutar').val());
+        })
+    </script>
+    <script>
+        $('#iniciaprueba').click(function (e) {
+            var idpruebaejecutar = $('#idpruebaejecutar').val();
+
+            console.log("inicia proceso con id " + idpruebaejecutar);
+
+            //var $modal = $(this)
+            $('#mensaje').html("Se ha iniciado la prueba. Por favor espera unos segundos...");
+            $('#iniciaprueba').html("Esperar..."); //TODO: Desabilitarlo
+
+            $.ajax({
+                url: globalVariable.url_json + '/api/reportes',
+                type: 'POST',
+                //data: { 'idPrueba': idpruebaejecutar },
+                data: 'idPrueba=' + idpruebaejecutar,
+                success: function (result) {
+                    console.log("la prueba ha finalizado correctamente");
+
+                    $('#mensaje').html("La prueba ha finalizado correctamente. Diríjase a los Resultados de las Ejecuciones para ver los resultados.");
+                    $('#iniciaprueba').html("      OK      ");
+                    $('#iniciaprueba').attr("data-dismiss", "modal");
+
+                    var test = $("input[name=idpruebaejecutar]:hidden").val(0);
+                    console.log("valor seteado al cerrar: " + $('#idpruebaejecutar').val());
+                }
+            });
+            console.log("finaliza proceso");
+        });
+    </script>
+
+    <button data-target="#navbarResponsive" data-book-id="my_id_value"></button>
+
     <!-- jQuery -->
     <script src="/vendor/jquery/jquery.min.js"></script>
-
     <!-- Bootstrap Core JavaScript -->
     <script src="/vendor/bootstrap/js/bootstrap.min.js"></script>
-
     <!-- Metis Menu Plugin JavaScript -->
     <script src="/vendor/metisMenu/metisMenu.min.js"></script>
-
-    <!-- Morris Charts JavaScript -->
-    <script src="/vendor/raphael/raphael.min.js"></script>
-    <script src="/vendor/morrisjs/morris.min.js"></script>
-    <script src="/data/morris-data.js"></script>
-
     <!-- Custom Theme JavaScript -->
     <script src="/dist/js/sb-admin-2.js"></script>
-
 </body>
-
 </html>

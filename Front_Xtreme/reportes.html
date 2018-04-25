@@ -1,40 +1,143 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="">
-
     <title>Xtreme Test V3</title>
-
     <!-- Bootstrap Core CSS -->
     <link href="/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-
     <!-- MetisMenu CSS -->
     <link href="/vendor/metisMenu/metisMenu.min.css" rel="stylesheet">
-
     <!-- Custom CSS -->
     <link href="/dist/css/sb-admin-2.css" rel="stylesheet">
-
     <!-- Morris Charts CSS -->
     <link href="/vendor/morrisjs/morris.css" rel="stylesheet">
-
     <!-- Custom Fonts -->
     <link href="/vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
-
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
         <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
         <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
+    <script type="text/javascript" src="/js/config.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.js"
+            integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
+            crossorigin="anonymous">
+    </script>
+    <script>
+        (function () {
+            $.getJSON(globalVariable.url_json + "/api/reportes").done(function (data) {
+                if (data) {
+                    if (data.length > 0 && data != "[]") {
+                        var result = "";
 
+                        $(data).each(function () {
+                            var reporteId = this.idReporte;
+
+
+
+                            result = result + "<tr>";
+                            result = result + "<td>" + this.fechaReporte + "</td>";
+                            result = result + "<td>" + this.idPrueba + "</td>";
+                            result = result + "<td>" + this.idReporte + "</td>";
+
+                            var reporte = "";
+                            if (typeof this.urlReporte === 'string') {
+                                reporte = "<a href=\"" + globalVariable.url_json + "/" + this.urlReporte + "\" target=\"_blank\">" + this.urlReporte.replace("public/reportes/lighthouse/", ""); + "</a>";
+                            }
+                            else {
+                                reporte = "";
+                            }
+                            result = result + "<td>" + reporte + "</td>";
+
+                            var imagenes = "";
+                            result = result + "<td>" + imagenes + "</td>";
+                            /*
+                            if (typeof reporteId == 'number') {
+                                $.getJSON(globalVariable.url_json + "/api/imagenes/reportes/" + reporteId, function (dataimg) {
+                                    $.each(dataimg, function (i, field) {
+                                        //console.log("mmmm");
+                                        //console.log(field);
+                                        var imagenRutaCompleta = field.urlImagen;
+                                        imagenes = imagenes + "<br>" + "<a href=\"" + globalVariable.url_json + "/" + imagenRutaCompleta + "\" target=\"_blank\">" + imagenRutaCompleta.replace("public/imagenes/cypress/", ""); + "</a>";
+                                    });
+
+                                    result = result + "<td>" + imagenes + "</td>";
+                                });*/
+                                /*
+                                $.getJSON(globalVariable.url_json + "/api/imagenes/reportes/" + reporteId).done(function (dataimg) {
+                                    //console.log("dataimg para: " + reporteId + "   tamaño: " + dataimg.length);
+                                    if (dataimg) {
+                                        if (dataimg.length > 0 && dataimg != "[]") {
+
+
+                                            for (i = 0; i < dataimg.length; i++) {
+                                                var imagenRutaCompleta = dataimg[i].urlImagen;
+                                                imagenes = imagenes + "<br>" + "<a href=\"" + globalVariable.url_json + "/" + imagenRutaCompleta + "\" target=\"_blank\">" + imagenRutaCompleta.replace("public/imagenes/cypress/", ""); + "</a>";
+                                            }//for
+
+                                            result = result + "<td>" + imagenes + "</td>";
+                                        }
+                                        else {
+                                            //TODO: Mensaje, sin datos.
+                                            //console.log("Sin imagenes");
+                                        }
+                                    }
+                                }); //Imágenes por reporte*/
+                            //}
+                            /*
+                            if (typeof this.urlImagen === 'string') {
+                                var jsimagen = JSON.parse(this.urlImagen);
+                                $.each(jsimagen, function (index, value) {
+                                    imagenes = imagenes + "<br>" + "<a href=\"" + globalVariable.url_json + "/" + value + "\" target=\"_blank\">" + value.replace("public/imagenes/cypress/", ""); + "</a>";
+                                });
+                            }
+                            result = result + "<td>" + imagenes + "</td>";*/
+
+                            var video = "";
+                            if (typeof this.urlVideo === 'string') {
+                                video = "<a href=\"" + globalVariable.url_json + "/" + this.urlVideo + "\" target=\"_blank\">" + this.urlVideo.replace("public/videos/cypress/", ""); + "</a>";
+                            }
+                            else {
+                                video = "";
+                            }
+                            result = result + "<td>" + video + "</td>";
+
+                            var info = "";
+                            if (typeof this.informacion === 'string') {
+                                var jsinfo = JSON.parse(this.informacion);
+                                info = info + "Test: " + jsinfo.tests;
+                                info = info + "<br>Passes: " + jsinfo.passes;
+                                info = info + "<br>Pending: " + jsinfo.pending;
+                                info = info + "<br>Failures: " + jsinfo.failures;
+                                info = info + "<br>Duration: " + jsinfo.duration;
+                                info = info + "<br>Screenshots: " + jsinfo.screenshots;
+                                info = info + "<br>Video: " + jsinfo.video;
+                                info = info + "<br>Version: " + jsinfo.version;
+                            }
+
+                            result = result + "<td>" + info + "</td>";
+                            result = result + "</tr>";
+                        });
+
+                        var fila = $("#dataTable tbody");
+                        fila.append(result);
+                    }
+                    else {
+                        //TODO: Mensaje, sin datos.
+                        console.log("Sin datos");
+                    }
+                }
+                else {
+                    //TODO: Mensaje, sin datos.
+                    console.log("Sin datos");
+                }
+            });
+        })();
+    </script>
 </head>
-
 <body>
     <div id="wrapper">
         <!-- Navigation -->
@@ -175,7 +278,6 @@
                         <li>
                             <a href="reportesdetalle.html"><i class="fa fa-fw fa-area-chart"></i>Resultados de Ejecuciones</a>
                         </li>
-
                         <li>
                             <a href="reportes.html"><i class="fa fa-fw fa-table"></i>Métodos de Análisis</a>
                         </li>
@@ -198,41 +300,49 @@
             </div>
             <!--Menu lateral Fin-->
         </nav>
-
+        <!--Contenido Pagina Inicio-->
         <div id="page-wrapper">
             <div class="row">
                 <div class="col-lg-12">
-                    <h1 class="page-header">Xtreme Test V3.0</h1>
+                    <h4 class="page-header">Métodos de Análisis</h4>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-lg-12">
-                    <h3>Diana Espitia</h3>
-                    <h3>Diego Mahecha</h3>
-                    <h3>Fabio Bolívar</h3>
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                Listado
+                            </div>
+                            <div class="panel-body" style="overflow: scroll">
+                                <table class="table table-striped table-bordered table-hover" id="dataTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Fecha</th>
+                                            <th>Prueba</th>
+                                            <th>Reporte</th>
+                                            <th>Reporte Lighthouse</th>
+                                            <th>Imagen</th>
+                                            <th>Video</th>
+                                            <th>Información</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <!-- /#page-wrapper -->
+        <!--Contenido Pagina Fin-->
     </div>
     <!-- /#wrapper -->
     <!-- jQuery -->
     <script src="/vendor/jquery/jquery.min.js"></script>
-
     <!-- Bootstrap Core JavaScript -->
     <script src="/vendor/bootstrap/js/bootstrap.min.js"></script>
-
     <!-- Metis Menu Plugin JavaScript -->
     <script src="/vendor/metisMenu/metisMenu.min.js"></script>
-
-    <!-- Morris Charts JavaScript -->
-    <script src="/vendor/raphael/raphael.min.js"></script>
-    <script src="/vendor/morrisjs/morris.min.js"></script>
-    <script src="/data/morris-data.js"></script>
-
     <!-- Custom Theme JavaScript -->
     <script src="/dist/js/sb-admin-2.js"></script>
-
 </body>
-
 </html>
