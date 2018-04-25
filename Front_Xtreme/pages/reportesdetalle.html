@@ -42,20 +42,13 @@
                             $("#herramienta").append($("<option></option>").val(reporte).html(nombrereporte));
                         });
                     }
-                    else {
-                        //TODO: Mensaje, sin datos.
-                        //console.log("Sin datos");
-                    }
-                }
-                else {
-                    //TODO: Mensaje, sin datos.
-                    //console.log("Sin datos");
                 }
             });
         })();
     </script>
 
-    <script>        
+    <script>
+
         function comparacion() {
             var contador = 0;
             var marcados = new Array();
@@ -65,18 +58,17 @@
 
                     marcados[contador] = $(this).val();
 
-                    if (marcadosComa == "")
-                    {
+                    if (marcadosComa == "") {
                         marcadosComa = "['" + $(this).val() + "'";
                     }
                     else {
                         marcadosComa = marcadosComa + ", '" + $(this).val() + "']";
                     }
-                                        
+
                     contador++;
                 }
             });
-                      
+
             console.log(marcados);
             console.log(marcadosComa);
             console.log(marcados.length);
@@ -86,7 +78,6 @@
                 console.log("btn a enviar:");
                 console.log(marcadosComa);
                 $('#icompara').html("<a href=\"#\" onclick=\"enviaComparacion(" + marcadosComa + ")\">Comparar</a>");
-                //$('#icompara').show();
             }
             else {
                 //ocultar boton comparacion
@@ -97,7 +88,7 @@
         }
     </script>
     <script>
-        function enviaComparacion(params) {                                                           
+        function enviaComparacion(params) {
             //$('#mensaje').html("Se ha iniciado la prueba. Por favor espera unos segundos...");
             //$('#iniciaprueba').html("Esperar..."); //TODO: Desabilitarlo
 
@@ -105,12 +96,61 @@
                 url: globalVariable.url_json + '/api/comparacionesvisuales',
                 type: 'POST',
                 contentType: "application/json; charset=utf-8",
-                data: "{\"idImagen1\":" + params[0] + ", \"idImagen2\":" + params[1] + "}",                
+                data: "{\"idImagen1\":" + params[0] + ", \"idImagen2\":" + params[1] + "}",
                 success: function (result) {
                     console.log("la comparacion ha finalizado correctamente");
                     $("#modalcomparacion").modal();
+
+                    mostrarComparaciones(params[0], params[1]);
                 }
-            });            
+            });
+        }
+    </script>
+    <script>
+        function mostrarComparaciones(idImagen1, idImagen2) {
+            //$("#modalvideo").modal();
+
+            $.getJSON(globalVariable.url_json + "/api/comparacionesvisuales/" + idImagen1 + "/" + idImagen2).done(function (dataimg) {
+                console.log("dataimg comp para: " + idImagen1 + " y " + idImagen2);
+                if (dataimg) {
+                    if (dataimg.length > 0 && dataimg != "[]") {
+                        var estructura = "";
+                        var divCerrado = false;
+
+                        //Solo se va a tomar la última comparación
+                        var idComparacion = dataimg[dataimg.length - 1].idComparacionVisual;
+                        var imagenRutaCompleta = dataimg[dataimg.length - 1].rutaImagenComparacion;
+                        var informacionComparacion = dataimg[dataimg.length - 1].informacion;
+
+                        estructura = "<div class=\"row\">";
+                        estructura = estructura + "<div class=\"col-lg-6\"><div class=\"panel panel-default\"><div class=\"panel-heading\"><i class=\"fa fa-object-group fa-fw\"></i>Comparación imágenes "
+                            + idImagen1 + " y " + idImagen2 + "</div>";
+                        estructura = estructura + "<div class=\"panel-body\"><div><a href=\"" + globalVariable.url_json + "/" + imagenRutaCompleta + "\" target=\"_blank\"><img src=\""
+                            + globalVariable.url_json + "/" + imagenRutaCompleta + "\" class=\"img-thumbnail\"></a></div>"
+                            + "<div><b>Información comparación:</b><br>" + informacionComparacion + "</div>"
+                            + "</div></div></div>";
+                        estructura = estructura + "</div>";
+
+                        console.log("Comparacion IMG");
+                        console.log(informacionComparacion);
+                        //console.log(estructura);
+
+                        $('#imagenescomparacion').html(estructura);
+                        $('#imagenescomparacion').show();
+                    }
+                    else {
+                        $('#imagenescomparacion').hide();
+                    }
+                }
+                else {
+                    $('#imagenescomparacion').hide();
+                }
+            }); //Comparación imágenes
+        }
+    </script>
+    <script>
+        function verVideoModal() {
+            $("#modalvideo").modal();
         }
     </script>
 </head>
@@ -255,7 +295,7 @@
                             <a href="reportesdetalle.html"><i class="fa fa-fw fa-area-chart"></i>Resultados de Ejecuciones</a>
                         </li>
                         <li>
-                            <a href="reportes.html"><i class="fa fa-fw fa-table"></i>Reportes</a>
+                            <a href="reportes.html"><i class="fa fa-fw fa-table"></i>Métodos de Análisis</a>
                         </li>
                         <li>
                             <a href="#"><i class="fa fa-wrench fa-fw"></i>Configuración<span class="fa arrow"></span></a>
@@ -473,8 +513,11 @@
                         </div>
                     </div>
                 </div>
-                <!--Linea3 Dinamica-->
+                <!--Linea3a Dinamica-->
                 <div id="imagenes">
+                </div>
+                <!--Linea3b Comparacion-->
+                <div id="imagenescomparacion">
                 </div>
                 <!--Linea4 Lighthouse-->
                 <div class="row" id="lighthouserow">
@@ -503,38 +546,65 @@
                         </div>
                     </div>
                 </div>
+                <!--Linea5 Mutantes-->                
+                <div class="row" id="mutantesrow">
+                    <div class="col-lg-12">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <i class="fa fa-group fa-fw"></i>Reporte Mutantes                                
+                            </div>
+                            <div class="panel-body">
+                                <div id="mutantesbody" style="width:100%; height:100%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <!--Row General-->
         </div>
         <!--Contenido Pagina Fin-->
     </div>
     <!-- /#wrapper -->
-
     <!--Ventana modal comparacion-->
     <div class="modal fade" id="modalcomparacion">
         <div class="modal-dialog">
             <div class="modal-content">
-
                 <!-- Modal Header -->
                 <div class="modal-header">
                     <h4 class="modal-title">Comparar imagen</h4>
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
-
                 <!-- Modal body -->
                 <div class="modal-body">
                     Se han comparado las imágenes de manera correcta
                 </div>
-
                 <!-- Modal footer -->
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
                 </div>
-
             </div>
         </div>
     </div>
 
+    <!--Ventana modal video-->
+    <div class="modal fade" id="modalvideo" role="dialog">
+        <div class="modal-dialog  modal-lg">
+            <div class="modal-content">
+                <!-- Modal body -->
+                <div class="modal-body" id="modalvideobody">
+                    <video controls width="800" height="600" id="modalvideocontrol">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+
+                <!-- Modal footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+      
     <!-- jQuery -->
     <script src="../vendor/jquery/jquery.min.js"></script>
     <!-- Bootstrap Core JavaScript -->
@@ -551,12 +621,11 @@
     <script>
         $('#herramienta').change(function () {
             var idreporte = $('#herramienta').val();
-            //idreporte = 1;
 
             $.getJSON(globalVariable.url_json + "/api/reportes/" + idreporte).done(function (data) {
-                //console.log("DataReporte para: " + idreporte);
                 if (data) {
                     if (data != "[]") {
+                        //Mostrar lighthouse
                         if (typeof data.urlReporte === 'string') {
                             var repo = globalVariable.url_json + "/" + data.urlReporte;
                             $('#lighthouse').html("<object type=\"text/html\" data=\"" + repo + " \" style=\"width:100%; height:300px\"></object>");
@@ -565,6 +634,18 @@
                         }
                         else {
                             $('#lighthouserow').hide();
+                        }
+
+                        //Mostrar Mutantes
+                        if (typeof data.urlLog === 'string') {
+                            var log = globalVariable.url_json + "/" + data.urlLog;
+                            console.log("log: " + log);
+                            $('#mutantesbody').html("<object type=\"text/plain\" data=\"" + log + " \" style=\"width:100%; height:300px\"></object>");
+                            //$('#mutantesbody').html("<a href=\"" + repo + "\" target=\"_blank\">Ir al reporte</a>");
+                            $('#mutantesrow').show();
+                        }
+                        else {
+                            $('#mutantesrow').hide();
                         }
 
                         if (typeof data.informacion === 'string') {
@@ -582,7 +663,10 @@
                                 //console.log(data.urlVideo);
                                 //console.log(jsinfo.ulrVideo);
                                 var ulrVideo = globalVariable.url_json + "/" + data.urlVideo;
-                                $('#ivideo').html("<a href=\"" + ulrVideo + "\" target=\"_blank\">Ver...</a>");
+                                $('#ivideo').html("<a href=\"" + ulrVideo + "\" target=\"_blank\">Ver...</a><a href=\"#\" onclick=\"verVideoModal()\">&nbsp;&nbsp;&nbsp;...</a>");
+
+                                var vid = document.getElementById("modalvideocontrol");
+                                vid.src = ulrVideo;
                             }
                             else {
                                 $('#ivideo').html("Sin video");
@@ -634,16 +718,8 @@
                                 $('#imagenes').hide();
                             }
                         }); //Imágenes por reporte
-                    }
-                    else {
-                        //TODO: Mensaje, sin datos.
-                        //console.log("Sin datos");
-                    }
-                }
-                else {
-                    //TODO: Mensaje, sin datos.
-                    //console.log("Sin datos");
-                }
+                    }                   
+                }               
             });
         });
     </script>
