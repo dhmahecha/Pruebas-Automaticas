@@ -49,8 +49,6 @@ var SeqReportes    = require('./models/seqreportes');
 var SeqImagenes    = require('./models/seqimagenes');
 var SeqComparacionesVisuales = require('./models/seqcomparacionesvisuales');
 
-const ruta_screenshots = 'cypress/screenshots/';
-const ruta_http_screenshots = 'static/imagenes/';
 const rutaImagenes = 'public/imagenes/';
 
 
