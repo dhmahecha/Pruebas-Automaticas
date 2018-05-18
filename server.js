@@ -437,8 +437,8 @@ router.route('/reportes')
                 res.send(err);
             res.json(reportes);
         });
-    });
-
+	});
+	
 	router.route('/comparacionesvisuales')
 		.post(function(req, res) {
 			console.log(req.body.idImagen1);

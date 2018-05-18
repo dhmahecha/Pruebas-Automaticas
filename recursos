@@ -1,5 +1,6 @@
 /api/herramientaspruebas GET ->  Obtener todo el listado de herramientas
 /api/aplicaciones GET -> Obtener el listado de aplicaciones
+/api/pruebas POST -> Guardar prueba con el botón guardar
 /api/pruebas GET -> Obtener el listado de pruebas 
 /api/reportes POST -> Guardar reporte con el botón ejecutar 
 
@@ -10,7 +11,6 @@
 /api/pruebas POST -> Guardar prueba con el botón guardar
 /api/pruebas GET -> Obtener el listado de pruebas 
 /api/reportes POST -> Guardar reporte con el botón ejecutar 
-/api/reportes/pruebas/1 GET ->  Obtener el listado de reportes por prueba
 /api/reportes/72 GET -> Obtener un reporte para ver el detalle
 /api/imagenes/reportes/:idReporte GET -> Obtener las imágenes disponibles para un reporte
 /api/comparacionesvisuales POST -> compara dos imágenes: deben pasarse los ids de las imágenes a comparar 
@@ -40,11 +40,18 @@ Este recurso /api/aplicaciones/herramientaaplicacion/:idHerramienta remplaza est
 /api/imagenes/reportes/:idReporte GET
 /api/comparacionesvisuales POST
 
+iteración 4
+-----------------------------------
 
-/herramientasaplicaciones/:idHerramienta/:idAplicacion GET -> con la herramienta y la aplicación se obtiene el idHerramientaAplicacion que se envía al recurso de pruebas
+/api/herramientasaplicaciones/:idHerramienta/:idAplicacion GET -> con la herramienta y la aplicación se obtiene el idHerramientaAplicacion que se envía al recurso de pruebas
 /api/pruebas POST -> Guardar prueba con el botón guardar
 Ejemplo:
 {
     "idHerramientaAplicacion": 1,
     "nombreArchivo": ""
 }
+/api/reportes/pruebas/1 GET ->  Obtener el listado de reportes por prueba
+
+
+Para la última iteración
+Niveles y tipos de pruebas
