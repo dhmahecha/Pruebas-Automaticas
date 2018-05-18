@@ -246,7 +246,6 @@ router.route('/aplicaciones')
 
 router.route('/pruebas')		
     .post(function(req, res) {
-
 		SeqPruebas.findOneAndUpdate(
 			{sequenceName: PRUEBA_SEQ},
 			{ "$inc": { "sequenceValue": 1 } },
@@ -279,32 +278,16 @@ router.route('/pruebas')
 
 router.route('/reportes')
     .post(function(req, res) {
-		SeqReportes.findOne(
-			// query
+		SeqReportes.findOneAndUpdate(
 			{sequenceName: REPORTE_SEQ},
-			// callback function
-			(err, seqReporte) => {
-			if (err) 
-				return err;
-			return  seqReporte;
-		})
-		.then((results) => {
-			var secuencia = results.sequenceValue + 1;
-			SeqReportes.findOne(
-				// query
-				{sequenceName: REPORTE_SEQ},
-				// callback function
-				(err, seqReporte) => {
+			{ "$inc": { "sequenceValue": 1 } },
+			function(err,seqReporte) {
 				if (err) 
 					return err;
-					
-				seqReporte.sequenceValue = secuencia;
-				seqReporte.save(function (err, seqReporte) {
-					if (err) 
-						return err;				
-					return  seqReporte;
-				});	
-			});	
+		
+			}
+		).then((results) => {
+			var secuencia = results.sequenceValue;
 			var reporte = new Reportes(); // create a new instance of the Reportes model
 			Pruebas.findOne(
 				// query
