@@ -10,7 +10,9 @@ var ReportesSchema   = new Schema({
     urlLog: String,
     urlReporte: String,
     informacion: String,
-    fechaReporte: { type: Date, default: Date.now }
+    indEstado: { type: Number, default: 1 },
+    fechaProcesamiento: Date,
+    fechaCreacion: { type: Date, default: Date.now }
 });
 
 module.exports = mongoose.model('Reportes', ReportesSchema);
