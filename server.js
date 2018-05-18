@@ -202,7 +202,19 @@ router.route('/aplicaciones')
             res.json({ message: 'herramienta aplicacion creada!' });
         });
 
-    })
+	})
+	
+	router.route('/herramientasaplicaciones/:idHerramienta/:idAplicacion')
+    .get(function(req, res) {
+		var herramientasAplicaciones = HerramientasAplicaciones.findOne(
+			// query
+			{idHerramienta: req.params.idHerramienta, idAplicacion: req.params.idAplicacion},
+			(err, herramientaaplicacion) => {
+			if (err) 
+				res.send(err);
+			return  res.json(herramientaaplicacion);
+		})
+	});
 	
 	router.route('/aplicaciones/herramientaaplicacion/:idHerramienta')
 	.get(function(req, res) {
@@ -234,34 +246,18 @@ router.route('/aplicaciones')
 
 router.route('/pruebas')		
     .post(function(req, res) {
-		SeqPruebas.findOne(
-			// query
+
+		SeqPruebas.findOneAndUpdate(
 			{sequenceName: PRUEBA_SEQ},
-			// callback function
-			(err, seqPrueba) => {
-			if (err) 
-				return err;
-			return  seqPrueba;
-		})
-		.then((results) => {
-			var secuencia = results.sequenceValue + 1;
-			SeqPruebas.findOne(
-				// query
-				{sequenceName: PRUEBA_SEQ},
-				// callback function
-				(err, seqPrueba) => {
+			{ "$inc": { "sequenceValue": 1 } },
+			function(err,seqPrueba) {
 				if (err) 
 					return err;
-					
-				seqPrueba.sequenceValue = secuencia;
-				seqPrueba.save(function (err, seqPrueba) {
-					if (err) 
-						return err;				
-					return  seqPrueba;
-				});	
-			});
+		
+			}
+		).then((results) => {
 			var prueba = new Pruebas();      // create a new instance of the Pruebas model
-			prueba.idPrueba = secuencia;  
+			prueba.idPrueba = results.sequenceValue;  
 			prueba.idHerramientaAplicacion = req.body.idHerramientaAplicacion
 			prueba.nombreArchivo = req.body.nombreArchivo;
 			// save the prueba and check for errors
@@ -271,7 +267,7 @@ router.route('/pruebas')
 
 				res.json({ message: 'Prueba creada!' });
 			});	
-		});			
+		});		
     })
     .get(function(req, res) {
         Pruebas.find(function(err, pruebas) {
@@ -283,7 +279,6 @@ router.route('/pruebas')
 
 router.route('/reportes')
     .post(function(req, res) {
-
 		SeqReportes.findOne(
 			// query
 			{sequenceName: REPORTE_SEQ},
