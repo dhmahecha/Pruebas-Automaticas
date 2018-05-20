@@ -1,0 +1,6 @@
+MUTANT 1:	RFCAM index.js Line 3:	`module.exports = require("./app/prestashop/js/tools.js");` > `module.exports = require();'`
+MUTANT 2:	RFCAM index.js Line 4:	`module.exports = require("./app/prestashop/js/validate.js");` > `module.exports = require();'`
+MUTANT 3:	RFCAM index.js Line 5:	`module.exports = require("./app/prestashop/js/date.js");` > `module.exports = require();'`
+MUTANT 4:	RFCAM index.js Line 6:	`module.exports = require("./app/prestashop/js/admin.js");` > `module.exports = require();'`
+MUTANT 5:	RFCAM index.js Line 7:	`module.exports = require("./app/prestashop/js/admin-categories-tree.js");` > `module.exports = require();'`
+MUTANT 6:	RFCAM index.js Line 8:	`module.exports = require("./app/prestashop/js/cldr.js");` > `module.exports = require();'`

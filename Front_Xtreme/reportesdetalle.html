@@ -22,9 +22,18 @@
         <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
     <script type="text/javascript" src="/js/config.js"></script>
+    <script type="text/javascript" src="/js/scripts.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.js"
             integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
             crossorigin="anonymous">
+    </script>
+    <script>
+        function getParameterByName(name) {
+            name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+            var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+            results = regex.exec(location.search);
+            return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+        }
     </script>
     <script>
         (function () {
@@ -38,9 +47,20 @@
 
                         $(data).each(function () {
                             var reporte = this.idReporte;
-                            var nombrereporte = this.idReporte + " - " + this.fechaReporte;
-                            $("#herramienta").append($("<option></option>").val(reporte).html(nombrereporte));
+                            var fechaFormato = formatDate(this.fechaReporte, 5);
+                            var nombrereporte = this.idReporte + " - " + fechaFormato;
+                            $("#reporte").append($("<option></option>").val(reporte).html(nombrereporte));
                         });
+
+                        var reporteId = getParameterByName('reporte');
+                        console.log("Reporte invocado: " + reporteId);
+
+                        if (true) //TODO: Validar que sea un numero
+                        {
+                            $('#reporte').val(reporteId);
+                            $('#reporte').trigger("change");
+                        }
+
                     }
                 }
             });
@@ -48,7 +68,6 @@
     </script>
 
     <script>
-
         function comparacion() {
             var contador = 0;
             var marcados = new Array();
@@ -278,15 +297,7 @@
                 <div class="sidebar-nav navbar-collapse">
                     <ul class="nav" id="side-menu">
                         <li>
-                            <a href="#"><i class="fa fa-fw fa-file"></i>Nueva Prueba<span class="fa arrow"></span></a>
-                            <ul class="nav nav-second-level" id="apps">
-                                <li>
-                                    <a href="nuevapruebaweb.html">Aplicación Web</a>
-                                </li>
-                                <li>
-                                    <a href="#">Android APK</a>
-                                </li>
-                            </ul>
+                            <a href="nuevapruebaweb.html"><i class="fa fa-fw fa-file"></i>Nueva Prueba</a>
                         </li>
                         <li>
                             <a href="ejecutarprueba.html"><i class="fa fa-fw fa-dashboard"></i>Ejecutar Pruebas</a>
@@ -323,9 +334,12 @@
                     <h4 class="page-header">Resultados de Ejecuciones</h4>
                 </div>
                 <div class="row">
-                    <div class="col">
-                        <div class="form-group">
-                            <select class="form-control" id="herramienta">
+                    <div class="col-lg-1">
+                        <label for="reporte">Reporte:</label>
+                    </div>
+                    <div class="col-lg-11">
+                        <div class="form-group">                            
+                            <select class="form-control" id="reporte">
                                 <option value="0" selected="selected">Seleccione reporte...</option>
                             </select>
                         </div>
@@ -546,12 +560,12 @@
                         </div>
                     </div>
                 </div>
-                <!--Linea5 Mutantes-->                
+                <!--Linea5 Mutantes-->
                 <div class="row" id="mutantesrow">
                     <div class="col-lg-12">
                         <div class="panel panel-default">
                             <div class="panel-heading">
-                                <i class="fa fa-group fa-fw"></i>Reporte Mutantes                                
+                                <i class="fa fa-group fa-fw"></i>Reporte Mutantes
                             </div>
                             <div class="panel-body">
                                 <div id="mutantesbody" style="width:100%; height:100%"></div>
@@ -604,7 +618,7 @@
             </div>
         </div>
     </div>
-      
+
     <!-- jQuery -->
     <script src="/vendor/jquery/jquery.min.js"></script>
     <!-- Bootstrap Core JavaScript -->
@@ -619,8 +633,10 @@
     <script src="/data/morris-data.js"></script>
 
     <script>
-        $('#herramienta').change(function () {
-            var idreporte = $('#herramienta').val();
+        $('#reporte').change(function () {
+            var idreporte = $('#reporte').val();
+
+            console.log("Llamado al evento change");
 
             $.getJSON(globalVariable.url_json + "/api/reportes/" + idreporte).done(function (data) {
                 if (data) {
@@ -718,8 +734,8 @@
                                 $('#imagenes').hide();
                             }
                         }); //Imágenes por reporte
-                    }                   
-                }               
+                    }
+                }
             });
         });
     </script>

@@ -22,6 +22,7 @@
         <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
     <script type="text/javascript" src="/js/config.js"></script>
+    <script type="text/javascript" src="/js/scripts.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.js"
             integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
             crossorigin="anonymous">
@@ -40,8 +41,9 @@
 
                         $(data).each(function () {
                             console.log(this);
+                            var fechaFormato = formatDate(this.fechaCreacion, 5);
                             result = result + "<tr>";
-                            result = result + "<td>" + this.fechaCreacion + "</td>";
+                            result = result + "<td>" + fechaFormato + "</td>";
                             result = result + "<td>" + this.idHerramienta + "-" + this.nombreHerramienta + "</td>";
                             result = result + "<td>" + this.rutaReportes + "</td>";
                             result = result + "<td>" + this.rutaHttpVideos + "</td>";
@@ -194,15 +196,7 @@
                 <div class="sidebar-nav navbar-collapse">
                     <ul class="nav" id="side-menu">
                         <li>
-                            <a href="#"><i class="fa fa-fw fa-file"></i>Nueva Prueba<span class="fa arrow"></span></a>
-                            <ul class="nav nav-second-level" id="apps">
-                                <li>
-                                    <a href="nuevapruebaweb.html">Aplicación Web</a>
-                                </li>
-                                <li>
-                                    <a href="#">Android APK</a>
-                                </li>
-                            </ul>
+                            <a href="nuevapruebaweb.html"><i class="fa fa-fw fa-file"></i>Nueva Prueba</a>
                         </li>
                         <li>
                             <a href="ejecutarprueba.html"><i class="fa fa-fw fa-dashboard"></i>Ejecutar Pruebas</a>

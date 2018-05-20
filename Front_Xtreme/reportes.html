@@ -22,6 +22,7 @@
         <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
     <script type="text/javascript" src="/js/config.js"></script>
+    <script type="text/javascript" src="/js/scripts.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.js"
             integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
             crossorigin="anonymous">
@@ -34,14 +35,15 @@
                         var result = "";
 
                         $(data).each(function () {
-                            var reporteId = this.idReporte;
+                            var reporteId = this.idReporte;                                                        
+                            var fechaFormato = formatDate(this.fechaReporte, 5);
 
-
+                            console.log("Fecha local: " + fechaFormato + ". Fecha UTC: " + this.fechaReporte);
 
                             result = result + "<tr>";
-                            result = result + "<td>" + this.fechaReporte + "</td>";
+                            result = result + "<td>" + fechaFormato + "</td>";
                             result = result + "<td>" + this.idPrueba + "</td>";
-                            result = result + "<td>" + this.idReporte + "</td>";
+                            result = result + "<td><a href=\"reportesdetalle.html?reporte=" + this.idReporte + "\">" + this.idReporte + "</a></td>";
 
                             var reporte = "";
                             if (typeof this.urlReporte === 'string') {
@@ -54,47 +56,6 @@
 
                             var imagenes = "";
                             result = result + "<td>" + imagenes + "</td>";
-                            /*
-                            if (typeof reporteId == 'number') {
-                                $.getJSON(globalVariable.url_json + "/api/imagenes/reportes/" + reporteId, function (dataimg) {
-                                    $.each(dataimg, function (i, field) {
-                                        //console.log("mmmm");
-                                        //console.log(field);
-                                        var imagenRutaCompleta = field.urlImagen;
-                                        imagenes = imagenes + "<br>" + "<a href=\"" + globalVariable.url_json + "/" + imagenRutaCompleta + "\" target=\"_blank\">" + imagenRutaCompleta.replace("public/imagenes/cypress/", ""); + "</a>";
-                                    });
-
-                                    result = result + "<td>" + imagenes + "</td>";
-                                });*/
-                                /*
-                                $.getJSON(globalVariable.url_json + "/api/imagenes/reportes/" + reporteId).done(function (dataimg) {
-                                    //console.log("dataimg para: " + reporteId + "   tamaño: " + dataimg.length);
-                                    if (dataimg) {
-                                        if (dataimg.length > 0 && dataimg != "[]") {
-
-
-                                            for (i = 0; i < dataimg.length; i++) {
-                                                var imagenRutaCompleta = dataimg[i].urlImagen;
-                                                imagenes = imagenes + "<br>" + "<a href=\"" + globalVariable.url_json + "/" + imagenRutaCompleta + "\" target=\"_blank\">" + imagenRutaCompleta.replace("public/imagenes/cypress/", ""); + "</a>";
-                                            }//for
-
-                                            result = result + "<td>" + imagenes + "</td>";
-                                        }
-                                        else {
-                                            //TODO: Mensaje, sin datos.
-                                            //console.log("Sin imagenes");
-                                        }
-                                    }
-                                }); //Imágenes por reporte*/
-                            //}
-                            /*
-                            if (typeof this.urlImagen === 'string') {
-                                var jsimagen = JSON.parse(this.urlImagen);
-                                $.each(jsimagen, function (index, value) {
-                                    imagenes = imagenes + "<br>" + "<a href=\"" + globalVariable.url_json + "/" + value + "\" target=\"_blank\">" + value.replace("public/imagenes/cypress/", ""); + "</a>";
-                                });
-                            }
-                            result = result + "<td>" + imagenes + "</td>";*/
 
                             var video = "";
                             if (typeof this.urlVideo === 'string') {
@@ -262,15 +223,7 @@
                 <div class="sidebar-nav navbar-collapse">
                     <ul class="nav" id="side-menu">
                         <li>
-                            <a href="#"><i class="fa fa-fw fa-file"></i>Nueva Prueba<span class="fa arrow"></span></a>
-                            <ul class="nav nav-second-level" id="apps">
-                                <li>
-                                    <a href="nuevapruebaweb.html">Aplicación Web</a>
-                                </li>
-                                <li>
-                                    <a href="#">Android APK</a>
-                                </li>
-                            </ul>
+                            <a href="nuevapruebaweb.html"><i class="fa fa-fw fa-file"></i>Nueva Prueba</a>
                         </li>
                         <li>
                             <a href="ejecutarprueba.html"><i class="fa fa-fw fa-dashboard"></i>Ejecutar Pruebas</a>
