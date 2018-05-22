@@ -44,6 +44,10 @@ iteración 4
 -----------------------------------
 
 /api/reportes/pruebas/1 GET ->  Obtener el listado de reportes por prueba
+/api/aplicaciones/herramientasaplicaciones/:idHerramientaAplicacion GET -> obtiene una aplicación por la colección intermedia herramientaaplicacion
+/api/herramientaspruebas/herramientasaplicaciones/:idHerramientaAplicacion GET -> obtiene una herramienta por la colección intermedia herramientaaplicacion
+
+
 
 
 Para la última iteración

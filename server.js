@@ -189,6 +189,74 @@ router.route('/aplicaciones')
         });
 	});
 
+
+	router.route('/aplicaciones/:idAplicacion')
+	.get(function(req, res) {
+        Aplicaciones.find(
+			// query
+			{idAplicacion: req.params.idAplicacion},
+
+			(err, aplicacion) => {
+				if (err) 
+					return res.send(err);
+				return  res.json(aplicacion);
+			});
+    });
+
+
+	router.route('/aplicaciones/herramientasaplicaciones/:idHerramientaAplicacion')
+	.get(function(req, res) {
+		HerramientasAplicaciones.findOne(
+			// query
+			{idHerramientaAplicacion: req.params.idHerramientaAplicacion},
+
+			(err, herramientaaplicacion) => {
+				if (err) 
+					return err;
+				return  herramientaaplicacion;
+		})
+		.then((results) => {
+			var herramientaaplicacion = results;
+			Aplicaciones.findOne(
+				// query
+				{idAplicacion: herramientaaplicacion.idAplicacion},
+	
+				(err, aplicacion) => {
+					console.log(aplicacion);
+					if (err) 
+						return res.send(err);
+					return  res.json(aplicacion);
+			});
+		});	
+    });
+
+
+	router.route('/herramientaspruebas/herramientasaplicaciones/:idHerramientaAplicacion')
+	.get(function(req, res) {
+		HerramientasAplicaciones.findOne(
+			// query
+			{idHerramientaAplicacion: req.params.idHerramientaAplicacion},
+
+			(err, herramientaaplicacion) => {
+				if (err) 
+					return err;
+				return  herramientaaplicacion;
+		})
+		.then((results) => {
+			var herramientaaplicacion = results;
+			HerramientasPruebas.findOne(
+				// query
+				{idHerramienta: herramientaaplicacion.idHerramienta},
+	
+				(err, aplicacion) => {
+					console.log(aplicacion);
+					if (err) 
+						return res.send(err);
+					return  res.json(aplicacion);
+			});
+		});	
+    });	
+
 	router.route('/herramientasaplicaciones')
     .post(function(req, res) {
         var herramientaaplicacion = new HerramientasAplicaciones();      // create a new instance of the HerramientaAplicacion model
