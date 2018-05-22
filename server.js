@@ -50,6 +50,7 @@ var SeqImagenes    = require('./models/seqimagenes');
 var SeqComparacionesVisuales = require('./models/seqcomparacionesvisuales');
 
 const rutaImagenes = 'public/imagenes/';
+const ESTADO_EN_PROCESO = 1;
 
 
 var port = process.env.PORT || 8080;        // set our port
@@ -280,12 +281,13 @@ router.route('/pruebas')
 		});		
     })
     .get(function(req, res) {
-        Pruebas.find(function(err, pruebas) {
+		Pruebas.find().sort({'idPrueba':-1}).exec(function(err, pruebas) {
             if (err)
                 res.send(err);
             res.json(pruebas);
         });
-    });
+	});
+
 
 router.route('/reportes')
     .post(function(req, res) {
@@ -298,152 +300,19 @@ router.route('/reportes')
 		
 			}
 		).then((results) => {
-			var secuencia = results.sequenceValue;
 			var reporte = new Reportes(); // create a new instance of the Reportes model
-			Pruebas.findOne(
-				// query
-				{idPrueba: req.body.idPrueba},
-				// callback function
-				(err, prueba) => {
-					if (err) 
-						return err;
-					return  prueba;
-			})
-			.then((results) => {
-				var prueba = results;
-				HerramientasAplicaciones.findOne(
-					// query
-					{idHerramientaAplicacion: prueba.idHerramientaAplicacion},
-					// callback function
-					(err, herramientaaplicacion) => {
-						if (err) 
-							return err;
-						return  herramientaaplicacion;
-					})					
-					.then((results) => {
-						var herramientaAplicacion = results;
-						Aplicaciones.findOne(
-							// query
-							{idAplicacion: herramientaAplicacion.idAplicacion},
-							// callback function
-							(err, aplicacion) => {
-								if (err) 
-									return err;
-								return  aplicacion;
-							})
-							.then((results) => {
-								var aplicacion = results;
-								HerramientasPruebas.findOne(
-									// query
-									{idHerramienta: herramientaAplicacion.idHerramienta},
-									// callback function
-									(err, herramienta) => {
-										if (err) 
-											return err;
-										return  herramienta;
-									})
-									.then((results) => {
-										var herramienta = results;
-										var nombreScreenshot = "Imagen_reporte_" + secuencia + "_prueba_" + req.body.idPrueba + "_";
-										var nombreVideo = "Video_reporte" + secuencia + "_prueba_" + req.body.idPrueba;
-										reporte.idReporte = secuencia;
-										reporte.idPrueba = req.body.idPrueba;
-										var rutaConfiguracionArchivo = herramienta.rutaConfiguracion + prueba.nombreArchivo;
-										if(herramientaAplicacion.idHerramienta == HERRAMIENTA_CYPRESS){
-											cypress.run({
-												spec: rutaConfiguracionArchivo,
-												env:{
-													urlAplicacion: aplicacion.urlAplicacion,
-													nombreAplicacion: aplicacion.nombreAplicacion,
-													screen: nombreScreenshot,
-												}
-											})
-											.then((results) => {
-												var cypress = results;
-												var rutaVideo = "";
-												var rutaImagenes = [];
-												var secuenciaImagen;
-
-												for(var i=0;i<=cypress.screenshots - 1;i++){
-													var rutaScreenshot = herramienta.rutaScreenshots+nombreScreenshot+(i+1)+".png";
-													var rutaImagen = herramienta.rutaImagenes+nombreScreenshot+(i+1)+".png";
-													rutaImagenes[i] = rutaImagen;
-													shell.cp(rutaScreenshot, herramienta.rutaImagenes);
-												}
-
-												if(cypress.video){
-													rutaVideo = herramienta.rutaHttpVideos+nombreVideo+".mp4";
-													shell.cp('-Rf', herramienta.rutaFisicaVideos+"*.mp4", rutaVideo);
-												}
-												rutaImagenes.forEach(function(rutaImagen, i){
-													SeqImagenes.findOneAndUpdate(
-														{sequenceName: IMAGEN_SEQ},
-														{ "$inc": { "sequenceValue": 1 } },
-														function(err,seqImagen) {
-															if (err) 
-																return err;
-													
-														}
-													).then((results) => {
-														var imagen = new Imagenes();
-														imagen.idImagen = results.sequenceValue;
-														imagen.urlImagen = rutaImagen;
-														imagen.idReporte = secuencia;
-														imagen.save(function(err) {
-														if (err) 
-															return err;				
-														return  imagen;	
-														});	
-													});	
-												});	
-												reporte.urlVideo = rutaVideo;
-												reporte.urlLog = req.body.urlLog;	
-												reporte.informacion = JSON.stringify(cypress);
-												reporte.save(function(err) {
-												if (err)
-													res.send(err);
-												res.json({ message: 'reporte de cypress creado!' });
-												});										
-												// save the reporte and check for errors
-											});
-										}
-										else if(herramientaAplicacion.idHerramienta == LIGHTHOUSE){
-											/*launchChromeAndRunLighthouse(aplicacion.urlAplicacion, flags).then(results => {
-												console.log("--------> Entra");
-											// Use results!
-											});*/
-
-											var comando = herramienta.comandoEjecucion  + rutaConfiguracionArchivo + " " + aplicacion.urlAplicacion;
-											var nombreReporte = "Reporte_" + secuencia + "_prueba_" + req.body.idPrueba + ".html";
-											shell.exec(comando + " --output-path " + herramienta.rutaReportes + nombreReporte) + " -output html";
-											reporte.urlReporte = herramienta.rutaReportes + nombreReporte;
-											reporte.save(function(err) {
-											if (err)
-												res.send(err);
-											res.json({ message: 'reporte de lighthouse creado!' });
-											});									
-										}
-										else if(herramientaAplicacion.idHerramienta == MUTODE){
-											var nombreLog = "Log_reporte_" + secuencia + "_prueba_" + req.body.idPrueba + ".log";
-											shell.cd("mutode/");
-											shell.exec(herramienta.comandoEjecucion);
-											shell.mv(".mutode/mutants*.log" ,  "../"+herramienta.rutaLogs+nombreLog);
-											reporte.urlLog = herramienta.rutaLogs + nombreLog;
-											reporte.save(function(err) {
-												if (err)
-													res.send(err);
-												res.json({ message: 'reporte de mutode creado!' });
-											});	
-										}
-
-									});	
-							});	
-					});				
-			});
+			reporte.idReporte = results.sequenceValue;
+			reporte.idPrueba = req.body.idPrueba;
+			reporte.indEstado = ESTADO_EN_PROCESO;
+			reporte.save(function(err) {
+				if (err) 
+					res.send(err);			
+				return  res.json({ message: 'Reporte en proceso:' +  reporte.idReporte});
+			});		
     	});
 	})	
     .get(function(req, res) {
-        Reportes.find(function(err, reportes) {
+        Reportes.find().sort({'idPrueba':-1}).exec(function(err, reportes) {
             if (err)
                 res.send(err);
             res.json(reportes);

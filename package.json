@@ -5,10 +5,16 @@
         "async": "^2.6.0",
         "body-parser": "~1.0.1",
         "express": "~4.0.0",
+        "fs": "0.0.1-security",
+        "kue": "^0.11.6",
+        "kue-scheduler": "^0.7.4",
         "lighthouse": "^2.9.2",
         "mongodb": "^3.0.2",
+        "mongoist": "^1.7.2",
         "mongoose": "^5.0.2",
         "mz": "^2.7.0",
+        "redis": "^2.8.0",
+        "redis-server": "^1.2.0",
         "requirejs": "^2.3.5",
         "resemblejs": "^2.10.0",
         "shelljs": "^0.8.1",
@@ -16,6 +22,8 @@
         "xvfb": "^0.2.3"
     },
     "devDependencies": {
-        "cypress": "^2.1.0"
+        "cypress": "^2.1.0",
+        "mocha-multi-reporters": "^1.1.7",
+        "mochawesome": "^3.0.2"
     }
 }
