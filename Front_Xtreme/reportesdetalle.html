@@ -85,6 +85,8 @@
                         //console.log("array1: " + textojs);
                         //console.log("array: " + JSON.parse(textojs));
 
+                        $('#icompara').html("<a href=\"regresion.html?prueba=" + pruebaId + "\" target=\"_blank\">Comparar</a>");
+
                         pintarDuracionReportes(JSON.parse(textojs));
                     }
                 }
@@ -330,6 +332,9 @@
                         </li>
                         <li>
                             <a href="ejecutarprueba.html"><i class="fa fa-fw fa-dashboard"></i>Ejecutar Pruebas</a>
+                        </li>
+                        <li>
+                            <a href="colas.html"><i class="fa fa-check-square"></i>Procesamiento de Colas</a>
                         </li>
                         <li>
                             <a href="reportesdetalle.html"><i class="fa fa-fw fa-area-chart"></i>Resultados de Ejecuciones</a>
@@ -863,7 +868,7 @@
                         $('#iduracion').html(duration);
                         $('#iscreen').html(screenshots);
                         $('#iversion').html(jsinfo.version);
-
+                        
                         if (jsinfo.video) {
                             var ulrVideo = globalVariable.url_json + "/" + data.urlVideo;
                             var ulrVideoVersus;

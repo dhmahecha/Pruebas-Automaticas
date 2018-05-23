@@ -29,17 +29,18 @@
     </script>
     <script>
         (function () {
-            $.getJSON(globalVariable.url_json + "/api/colas").done(function (data) {
+            $.getJSON(globalVariable.url_json + "/api/reportes").done(function (data) {
+                console.log(data);
                 if (data) {
                     if (data.length > 0 && data != "[]") {
                         var result = "";
 
                         $(data).each(function () {
-                            var reporteId = this.idReporte;                                                        
-                            var fechaFormato = formatDate(this.fechaReporte, 5);
+                            var reporteId = this.idReporte;
+                            var fechaFormato = formatDate(this.fechaCreacion, 5);
                             var estado = "";
 
-                            switch (this.idEstado) {
+                            switch (this.indEstado) {
                                 case 1:
                                     estado = "En Proceso";
                                     break;
@@ -203,6 +204,9 @@
                         </li>
                         <li>
                             <a href="ejecutarprueba.html"><i class="fa fa-fw fa-dashboard"></i>Ejecutar Pruebas</a>
+                        </li>
+                        <li>
+                            <a href="colas.html"><i class="fa fa-check-square"></i>Procesamiento de Colas</a>
                         </li>
                         <li>
                             <a href="reportesdetalle.html"><i class="fa fa-fw fa-area-chart"></i>Resultados de Ejecuciones</a>
