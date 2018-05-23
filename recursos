@@ -47,7 +47,18 @@ iteración 4
 /api/aplicaciones/herramientasaplicaciones/:idHerramientaAplicacion GET -> obtiene una aplicación por la colección intermedia herramientaaplicacion
 /api/herramientaspruebas/herramientasaplicaciones/:idHerramientaAplicacion GET -> obtiene una herramienta por la colección intermedia herramientaaplicacion
 
+Nuevas
+————————————————————————————
 
+/api/aplicaciones  POST -> crea una nueva aplicación, idHerramienta siempre enviarlo en 2
+{
+    "nombreAplicacion": "El tiempo",
+    "urlAplicacion": "http://www.eltiempo.com",
+    "idHerramienta" : 2
+}
+
+
+/comparacionesvisuales/reportes/:idPrueba GET -> devuelve la regresión visual de las pruebas
 
 
 Para la última iteración
