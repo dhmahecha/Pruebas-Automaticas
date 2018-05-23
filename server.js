@@ -30,6 +30,8 @@ const PRUEBA_SEQ = "seq_pruebas";
 const REPORTE_SEQ = "seq_reportes";
 const IMAGEN_SEQ = "seq_imagenes";
 const COMPARACION_VISUAL_SEQ = "seq_comparaciones_visuales";
+const APLICACION_SEQ = "seq_aplicaciones";
+const HERRAMIENTA_APLICACION_SEQ = "seq_herramientas_aplicaciones";
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -48,6 +50,8 @@ var SeqPruebas    = require('./models/seqpruebas');
 var SeqReportes    = require('./models/seqreportes');
 var SeqImagenes    = require('./models/seqimagenes');
 var SeqComparacionesVisuales = require('./models/seqcomparacionesvisuales');
+var SeqHerramientasAplicaciones = require('./models/seqherramientasaplicaciones');
+var SeqAplicaciones = require('./models/seqaplicaciones');
 
 const rutaImagenes = 'public/imagenes/';
 const ESTADO_EN_PROCESO = 1;
@@ -166,18 +170,48 @@ router.route('/herramientaspruebas/tipospruebas/:idTipoPrueba')
 
 router.route('/aplicaciones')
     .post(function(req, res) {
-        var aplicacion = new Aplicaciones();      // create a new instance of the Aplicaciones model
-        aplicacion.idAplicacion = req.body.idAplicacion;
-		aplicacion.nombreAplicacion = req.body.nombreAplicacion;
-		aplicacion.urlAplicacion = req.body.urlAplicacion;
-        // save the aplicacion and check for errors
-        aplicacion.save(function(err) {
-            if (err)
-                res.send(err);
-
-            res.json({ message: 'aplicacion creada!' });
-        });
-
+		SeqAplicaciones.findOneAndUpdate(
+			{sequenceName: APLICACION_SEQ},
+			{ "$inc": { "sequenceValue": 1 } },
+			function(err,seqPrueba) {
+				if (err) 
+					return err;
+		
+			}
+		)
+		.then((results) => {
+			var aplicacion = new Aplicaciones();      // create a new instance of the Aplicaciones model
+			var secuenciaAplicacion = results.sequenceValue;
+			aplicacion.idAplicacion = secuenciaAplicacion;
+			aplicacion.nombreAplicacion = req.body.nombreAplicacion;
+			aplicacion.urlAplicacion = req.body.urlAplicacion;
+			// save the aplicacion and check for errors
+			aplicacion.save()
+			.then((results) => {
+				SeqHerramientasAplicaciones.findOneAndUpdate(
+					{sequenceName: HERRAMIENTA_APLICACION_SEQ},
+					{ "$inc": { "sequenceValue": 1 } },
+					function(err,seqPrueba) {
+						if (err) 
+							return err;
+					}
+				)
+				.then((results) => {
+					var herramientaAplicacion = new HerramientasAplicaciones();
+					herramientaAplicacion.idHerramientaAplicacion = results.sequenceValue;
+					herramientaAplicacion.idHerramienta = req.body.idHerramienta;
+					herramientaAplicacion.idAplicacion = secuenciaAplicacion;
+					herramientaAplicacion.save(
+						function(err) {
+							if (err)
+								res.send(err);
+				
+							res.json({ message: 'Aplicación creada!' });
+						}
+					);
+				});
+			});
+		});
     })
    .get(function(req, res) {
         Aplicaciones.find(function(err, aplicaciones) {
@@ -565,6 +599,34 @@ router.route('/seqcomparacionesvisuales')
             res.json({ message: 'secuencia de comparación creada!' });
         });
     });	
+
+	router.route('/seqaplicaciones')
+    .post(function(req, res) {
+        var seqaplicaciones = new SeqAplicaciones();      // create a new instance of the seqimagenes model
+        seqaplicaciones.sequenceValue = req.body.sequenceValue;
+		seqaplicaciones.sequenceName = req.body.sequenceName;
+        // save the sequenceImagen and check for errors
+        seqaplicaciones.save(function(err) {
+            if (err)
+                res.send(err);
+
+            res.json({ message: 'secuencia de aplicaciones creada!' });
+        });
+	});	
+	
+	router.route('/seqherramientasaplicaciones')
+    .post(function(req, res) {
+        var seqherramientasaplicaciones = new SeqHerramientasAplicaciones();      // create a new instance of the seqimagenes model
+        seqherramientasaplicaciones.sequenceValue = req.body.sequenceValue;
+		seqherramientasaplicaciones.sequenceName = req.body.sequenceName;
+        // save the sequenceImagen and check for errors
+        seqherramientasaplicaciones.save(function(err) {
+            if (err)
+                res.send(err);
+
+            res.json({ message: 'secuencia de Herramieta aplicación creada!' });
+        });
+    });		
 
 // more routes for our API will happen here
 app.use(function(req, res, next) {
