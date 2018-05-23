@@ -39,20 +39,27 @@
             console.log("Titulo: " + titulo);
                                               
             $.getJSON(globalVariable.url_json + "/api/reportes/pruebas/" + pruebaId).done(function (data) {
+                console.log(globalVariable.url_json + "/api/reportes/pruebas/" + pruebaId);
+                $('#titulopagina').html(titulo);
                 if (data) {
                     if (data.length > 0 && data != "[]") {
 
-                        //console.log("Longitud data: " + data.length);
+                        console.log("Longitud data: " + data.length);
                         var result = "";
                         var $dropdown = $("#dropdown");
 
-                        $('#titulopagina').html(titulo);
+                        
                                                                        
                         var textojs = "";
 
                         $(data).each(function () {
                             var reporte = this.idReporte;
-                            var fechaFormato = formatDate(this.fechaReporte, 5);
+                            console.log("fecha: " + this.fechaCreacion);
+                            //console.log("fecha: " + this.fechaReporte);
+                            console.log(this);
+                          
+                            var fechaFormato = formatDate(this.fechaCreacion, 5);
+                            //var fechaFormato = formatDate(this.fechaReporte, 5);
                             var nombrereporte = "Reporte " + reporte + " - " + fechaFormato;
                             $("#reporte").append($("<option></option>").val(reporte).html("Principal: " + nombrereporte));
                             $("#reporteversus").append($("<option></option>").val(reporte).html("Comparación; " + nombrereporte));

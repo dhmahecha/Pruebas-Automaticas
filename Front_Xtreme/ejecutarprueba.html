@@ -36,15 +36,62 @@
             $.getJSON(globalVariable.url_json + "/api/pruebas").done(function (data) {
                 if (data) {
                     if (data.length > 0 && data != "[]") {
-
-                        //console.log("Longitud data: " + data.length);
-
-                        //data = $.parseJSON(data);
-                        //console.log(typeof data);
                         var result = "";
 
                         $(data).each(function () {
-                            //console.log(this);
+                            var id = this.idHerramientaAplicacion;
+                            var vidPrueba = this.idPrueba;
+                            var vfechaPrueba = this.fechaPrueba;
+                            var vnombreArchivo = this.nombreArchivo;
+
+                            $.getJSON(globalVariable.url_json + "/api/aplicaciones/herramientasaplicaciones/" + id).done(function (dataapp) {
+                                $.getJSON(globalVariable.url_json + "/api/herramientaspruebas/herramientasaplicaciones/" + id).done(function (dataherra) {
+                                    var herramienta = dataherra.nombreHerramienta;
+                                    var aplicacion = dataapp.nombreAplicacion;
+                                    var fechaFormato = formatDate(vfechaPrueba, 5);
+
+                                    result = "";
+                                    result = result + "<tr>";
+                                    result = result + "<td align=\"right\"><a href=\"reportesdetalle.html?prueba=" + vidPrueba + "&herramienta=" + herramienta + "&aplicacion=" + aplicacion + "\">" + vidPrueba + "</a></td>";
+                                    result = result + "<td>" + fechaFormato + "</td>";
+                                    result = result + "<td>" + herramienta + "</td>";
+                                    result = result + "<td>" + aplicacion + "</td>";
+                                    result = result + "<td>" + vnombreArchivo + "</td>";
+                                    result = result + "<td align=\"center\"><a href=\"#myModal\" data-toggle=\"modal\" id=\"" + vidPrueba + "\" data-target=\"#edit-modal\">Ejecutar</a></td>";
+                                    result = result + "</tr>";
+
+                                    var fila = $("#dataTable tbody");
+                                    fila.append(result);
+                                    console.log("R " + result);
+                                });
+                            });
+                        });
+                    }
+                }
+            });
+        })();
+    </script>
+    <!--
+    <script>
+        (function () {
+            $.getJSON(globalVariable.url_json + "/api/pruebas").then(function (data) {
+                if (data) {
+                    if (data.length > 0 && data != "[]") {
+                        var result = "";
+
+                        $(data).each(function () {
+                            console.log("Herramienta: " + this.idHerramientaAplicacion);
+
+                            //var a = dataAplicacion(this.idHerramientaAplicacion);
+                            //console.log("a: " + a);
+
+                            dataAplicacion(this.idHerramientaAplicacion).then(function (returndata) {
+                                //received data!
+                                console.log("a: " + returndata);
+                            });
+
+
+
 
                             //TODO: Cambiar por consulta dinamica
                             var herramienta = "";
@@ -91,9 +138,7 @@
                             result = result + "<td>" + aplicacion + "</td>";
                             result = result + "<td>" + this.nombreArchivo + "</td>";
 
-                            console.log(this.nombreArchivo);
-                            //result = result + "<td><button data-toggle=\"modal\" data-target=\"#pregunta\" class=\"btn btn-primary\" id=\"" + this.idPrueba + "\">Ejecutar</button></td>";
-                            //
+                            //console.log(this.nombreArchivo);
                             result = result + "<td align=\"center\"><a href=\"#myModal\" data-toggle=\"modal\" id=\"" + this.idPrueba + "\" data-target=\"#edit-modal\">Ejecutar</a></td>";
                             result = result + "</tr>";
                         });
@@ -113,6 +158,8 @@
             });
         })();
     </script>
+    -->
+
 </head>
 <body>
     <div id="wrapper">
