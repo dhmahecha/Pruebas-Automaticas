@@ -29,7 +29,7 @@ const MUTODE = 4;
 const PRUEBA_SEQ = "seq_pruebas";
 const REPORTE_SEQ = "seq_reportes";
 const IMAGEN_SEQ = "seq_imagenes";
-
+const COMPARACION_VISUAL_SEQ = "seq_comparaciones_visuales";
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -389,80 +389,61 @@ router.route('/reportes')
     	});
 	})	
     .get(function(req, res) {
-        Reportes.find().sort({'idPrueba':-1}).exec(function(err, reportes) {
+        Reportes.find().sort({'idReporte':-1}).exec(function(err, reportes) {
             if (err)
                 res.send(err);
             res.json(reportes);
         });
 	});
 
-
 	
-	router.route('/comparacionesvisuales')
-		.post(function(req, res) {
-			console.log(req.body.idImagen1);
-			console.log(req.body.idImagen2);
-			SeqComparacionesVisuales.findOneAndUpdate(
-				{sequenceName: COMPARACION_VISUAL_SEQ},
-				{ "$inc": { "sequenceValue": 1 } },
-				function(err,seqComparacionesVisuales) {
+	
+	router.route('/comparacionesvisuales/reportes/:idPrueba')
+	.get(function(req, res) {
+		Reportes.find(
+			// query
+			{idPrueba: req.params.idPrueba},
+
+			(err, reportes) => {
+			if (err) 
+				err;
+			return reportes;
+		})
+		.then((results) => {
+			var arrayIdsReportes = new Array();
+			for(i=0;i<results.length;i++){
+				arrayIdsReportes[i] = results[i].idReporte;	
+			}
+			var imagenes = Imagenes.find(
+				// query
+				{idReporte: {$in: arrayIdsReportes}},
+				(err, imagenes) => {
 					if (err) 
-						return err;
-				return seqComparacionesVisuales;
-				}
-			)
+						err;
+					return  imagenes;
+			})
 			.then((results) => {
-				console.log(results);
-				var comparacionVisual = new ComparacionesVisuales();
-				var secuencia = results.sequenceValue;
-				comparacionVisual.idComparacionVisual = secuencia;
-								
-				Imagenes.findOne(
-					// query
-					{idImagen: req.body.idImagen1},					
-					(err, imagen) => {
+				var arrayIdsImagenes = new Array();
+				for(i=0;i<results.length;i++){
+					arrayIdsImagenes[i] = results[i].idImagen;	
+				}
+				var comparacionesvisuales = ComparacionesVisuales.find({
+						$or:[
+						{
+							idImagen1: {$in: arrayIdsImagenes}
+						}, 
+						{
+							idImagen2: {$in: arrayIdsImagenes}
+						}]
+					},
+					(err, comparacionesvisuales) => {
 						if (err) 
-							return err;
-						return  imagen;
-				})
-				.then((results) => {
-					console.log('resultados imagen 1:' + results);
-					var rutaImagen1 = results.urlImagen;
-					Imagenes.findOne(
-						// query
-						{idImagen: req.body.idImagen2},						
-						(err, imagen) => {
-						if (err) 
-							return err;
-						return  imagen;
-					})
-					.then((results) => {
-						console.log('resultados imagen 2:' + results);
-						const options = {};
-						var rutaImagen2 = results.urlImagen;
-						compare(rutaImagen1, rutaImagen2, options, function (err, data) {
-							if (err) {
-								console.log('Ha ocurrido un error!' + err)
-							} else {
-								var nombreImagen = "ComparacionVisual_" + secuencia + ".png";
-								var rutaSalidaFisica = rutaImagenes + "resemblejs/" + nombreImagen;
-								fs.writeFile(rutaSalidaFisica, data.getBuffer());
-								comparacionVisual.idImagen1 = req.body.idImagen1;
-								comparacionVisual.idImagen2 = req.body.idImagen2;
-								comparacionVisual.rutaImagenComparacion = rutaSalidaFisica;
-								comparacionVisual.informacion = JSON.stringify(data);
-								comparacionVisual.save(function(err) {
-								if (err) 
-									res.send(err);			
-								return  res.json({ message: 'Comparación visual creada!' });
-								});									
-							}	
-						});	
-								
-					});	
-				});	
+							res.send(err);
+						return  res.json(comparacionesvisuales);
+					});
 			});	
 		});	
+	});	
 
 	router.route('/reportes/:idReporte')
 	.get(function(req, res) {
