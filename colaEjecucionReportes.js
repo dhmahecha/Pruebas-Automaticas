@@ -131,8 +131,9 @@ function actualizarEstadoReporte(idReporte){
 }
 
 function actualizarReporteCypress(idReporte, rutaVideo, cypress){
+    console.log("Actualizando reporte");
     return db.reportes.update({
-        idReporte: idReporte}, {$set: {urlVideo: rutaVideo, informacion: JSON.stringify(cypress)}}, {multi: true}
+        idReporte: idReporte}, {$set: {urlVideo: rutaVideo, informacion: JSON.stringify(cypress), fechaProcesamiento: Date.now}}, {multi: true}
     );
 }
 
@@ -141,13 +142,13 @@ function actualizarReporteLighthouse(idReporte, rutaReporte, informacion){
         idReporte: idReporte}, {$set: {urlReporte: rutaReporte, informacion: informacion}}, {multi: true}
     );*/
     return db.reportes.update({
-        idReporte: idReporte}, {$set: {urlReporte: rutaReporte}}, {multi: true}
+        idReporte: idReporte}, {$set: {urlReporte: rutaReporte, fechaProcesamiento: Date.now}}, {multi: true}
     );
 }
 
 function actualizarReporteMutode(idReporte, urlLog){
     return db.reportes.update({
-        idReporte: idReporte}, {$set: {urlLog: urlLog}}, {multi: true}
+        idReporte: idReporte}, {$set: {urlLog: urlLog, fechaProcesamiento: Date.now}}, {multi: true}
     );
 }
 
