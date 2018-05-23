@@ -36,34 +36,34 @@
             var herramientap = getParameterByName('herramienta');
             var aplicacionp = getParameterByName('aplicacion');
             var titulo = "Resultados de prueba " + pruebaId + " para " + aplicacionp + " con " + herramientap;
-            console.log("Titulo: " + titulo);
-                                              
+            //console.log("Titulo: " + titulo);
+
             $.getJSON(globalVariable.url_json + "/api/reportes/pruebas/" + pruebaId).done(function (data) {
-                console.log(globalVariable.url_json + "/api/reportes/pruebas/" + pruebaId);
+                //console.log(globalVariable.url_json + "/api/reportes/pruebas/" + pruebaId);
                 $('#titulopagina').html(titulo);
                 if (data) {
                     if (data.length > 0 && data != "[]") {
 
-                        console.log("Longitud data: " + data.length);
+                        //console.log("Longitud data: " + data.length);
                         var result = "";
                         var $dropdown = $("#dropdown");
 
-                        
-                                                                       
+
+
                         var textojs = "";
 
                         $(data).each(function () {
                             var reporte = this.idReporte;
-                            console.log("fecha: " + this.fechaCreacion);
+                            //console.log("fecha: " + this.fechaCreacion);
                             //console.log("fecha: " + this.fechaReporte);
-                            console.log(this);
-                          
+                            //console.log(this);
+
                             var fechaFormato = formatDate(this.fechaCreacion, 5);
                             //var fechaFormato = formatDate(this.fechaReporte, 5);
                             var nombrereporte = "Reporte " + reporte + " - " + fechaFormato;
                             $("#reporte").append($("<option></option>").val(reporte).html("Principal: " + nombrereporte));
                             $("#reporteversus").append($("<option></option>").val(reporte).html("Comparación; " + nombrereporte));
-                                                        
+
                             if (typeof this.informacion === 'string') {
                                 var jsinfo = JSON.parse(this.informacion);
 
@@ -71,8 +71,8 @@
                                     textojs = textojs + ", ";
                                 }
 
-                                textojs = textojs + '{ \"fecha\":\"' + fechaFormato + '\", \"duracion\":\"' + jsinfo.duration + '\"}';                                
-                            }                            
+                                textojs = textojs + '{ \"fecha\":\"' + fechaFormato + '\", \"duracion\":\"' + jsinfo.duration + '\"}';
+                            }
                         });
 
                         if (textojs == "") {
@@ -82,10 +82,10 @@
                             textojs = "[" + textojs + "]";
                         }
 
-                        console.log("array1: " + textojs);
-                        console.log("array: " + JSON.parse(textojs));
+                        //console.log("array1: " + textojs);
+                        //console.log("array: " + JSON.parse(textojs));
 
-                        pintarDuracionReportes(JSON.parse(textojs));                        
+                        pintarDuracionReportes(JSON.parse(textojs));
                     }
                 }
             });
@@ -195,6 +195,10 @@
     <script>
         function verVideoModal() {
             $("#modalvideo").modal();
+        }
+
+        function verVideoModalVersus() {
+            $("#modalvideoversus").modal();
         }
     </script>
 </head>
@@ -372,7 +376,7 @@
                         <div class="form-group">
                             <select class="form-control" id="reporteversus" onchange="validarComboboxSeleccionado();">
                                 <option value="0" selected="selected">Seleccione reporte a comparar...</option>
-                            </select>                            
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -694,6 +698,25 @@
         </div>
     </div>
 
+    <!--Ventana modal video comparacion-->
+    <div class="modal fade" id="modalvideoversus" role="dialog">
+        <div class="modal-dialog  modal-lg">
+            <div class="modal-content">
+                <!-- Modal body -->
+                <div class="modal-body" id="modalvideobodyversus">
+                    <video controls width="800" height="600" id="modalvideocontrolversus">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+
+                <!-- Modal footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- jQuery -->
     <script src="/vendor/jquery/jquery.min.js"></script>
     <!-- Bootstrap Core JavaScript -->
@@ -757,6 +780,8 @@
                         }
                     }
 
+                    console.log("hay comparacion: " + hayComparacion);
+
                     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                     //Mostrar lighthouse
                     $('#lighthouserow').hide();
@@ -802,25 +827,63 @@
 
                     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                     //Mostrar info general
+                    var test, passes, pending, failures, duration, screenshots, video;
+
                     if (typeof data.informacion === 'string') {
                         var jsinfo = JSON.parse(data.informacion);
-                        $('#itest').html(jsinfo.tests);
-                        $('#icorrectos').html(jsinfo.passes);
-                        $('#ipendientes').html(jsinfo.passes);
-                        $('#ifallos').html(jsinfo.failures);
-                        $('#iduracion').html(jsinfo.duration);
-                        $('#iscreen').html(jsinfo.screenshots);
+
+                        var jsinfoVersus;
+
+                        if (hayComparacion) {
+                            if (typeof dataVersus.informacion === 'string') {
+                                jsinfoVersus = JSON.parse(dataVersus.informacion);
+                            }
+                        }
+
+                        test = jsinfo.tests;
+                        passes = jsinfo.passes;
+                        pending = jsinfo.pending;
+                        failures = jsinfo.failures;
+                        duration = jsinfo.duration;
+                        screenshots = jsinfo.screenshots;
+
+                        if (hayComparacion) {
+                            test = jsinfo.tests + " / " + jsinfoVersus.tests;
+                            passes = jsinfo.passes + " / " + jsinfoVersus.passes;
+                            pending = jsinfo.pending + " / " + jsinfoVersus.pending;
+                            failures = jsinfo.failures + " / " + jsinfoVersus.failures;
+                            duration = jsinfo.duration + " / " + jsinfoVersus.duration;
+                            screenshots = jsinfo.screenshots + " / " + jsinfoVersus.screenshots;
+                        }
+
+                        $('#itest').html(test);
+                        $('#icorrectos').html(passes);
+                        $('#ipendientes').html(pending);
+                        $('#ifallos').html(failures);
+                        $('#iduracion').html(duration);
+                        $('#iscreen').html(screenshots);
                         $('#iversion').html(jsinfo.version);
 
                         if (jsinfo.video) {
-                            //console.log("vid");
-                            //console.log(data.urlVideo);
-                            //console.log(jsinfo.ulrVideo);
                             var ulrVideo = globalVariable.url_json + "/" + data.urlVideo;
-                            $('#ivideo').html("<a href=\"" + ulrVideo + "\" target=\"_blank\">Ver...</a><a href=\"#\" onclick=\"verVideoModal()\">&nbsp;&nbsp;&nbsp;...</a>");
+                            var ulrVideoVersus;
+
+                            if (hayComparacion) {
+                                if (jsinfoVersus.video) {
+                                    ulrVideoVersus = globalVariable.url_json + "/" + dataVersus.urlVideo;
+                                }
+                            }
+
+                            $('#ivideo').html("<a href=\"" + ulrVideo + "\" target=\"_blank\">Ver...</a><a href=\"#\" onclick=\"verVideoModal()\">&nbsp;&nbsp;&nbsp;...</a>"
+                                + "&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;" + "<a href=\"" + ulrVideoVersus + "\" target=\"_blank\">Ver...</a><a href=\"#\" onclick=\"verVideoModalVersus()\">&nbsp;&nbsp;&nbsp;...</a>");
 
                             var vid = document.getElementById("modalvideocontrol");
                             vid.src = ulrVideo;
+
+                            if (hayComparacion) {
+                                var vidVersus = document.getElementById("modalvideocontrolversus");
+                                vidVersus.src = ulrVideoVersus;
+                            }
                         }
                         else {
                             $('#ivideo').html("Sin video");
