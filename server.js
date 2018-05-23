@@ -29,7 +29,7 @@ const MUTODE = 4;
 const PRUEBA_SEQ = "seq_pruebas";
 const REPORTE_SEQ = "seq_reportes";
 const IMAGEN_SEQ = "seq_imagenes";
-const COMPARACION_VISUAL_SEQ = "seq_comparaciones_visuales";
+
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -357,8 +357,16 @@ router.route('/pruebas')
 	});
 
 
+function consultarUltimaImagenReporte(idReporte){
+	return Imagenes.aggregate([
+		{$match:{idReporte:idReporte}},
+		{$group: {_id:null,max:{$max:"$idImagen"}}}
+	]);
+}	
+
 router.route('/reportes')
     .post(function(req, res) {
+		
 		SeqReportes.findOneAndUpdate(
 			{sequenceName: REPORTE_SEQ},
 			{ "$inc": { "sequenceValue": 1 } },
@@ -368,8 +376,9 @@ router.route('/reportes')
 		
 			}
 		).then((results) => {
+			var idReporte = results.sequenceValue;
 			var reporte = new Reportes(); // create a new instance of the Reportes model
-			reporte.idReporte = results.sequenceValue;
+			reporte.idReporte = idReporte;
 			reporte.idPrueba = req.body.idPrueba;
 			reporte.indEstado = ESTADO_EN_PROCESO;
 			reporte.save(function(err) {
@@ -386,6 +395,8 @@ router.route('/reportes')
             res.json(reportes);
         });
 	});
+
+
 	
 	router.route('/comparacionesvisuales')
 		.post(function(req, res) {
