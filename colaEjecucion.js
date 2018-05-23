@@ -28,7 +28,10 @@ Queue.every('10 seconds', job);
 
 Queue.process(jobName, sendReport);
 
-async function sendReport(job, done) { 
+async function sendReport(job, done) {
+    var a = await consultarUltimaImagenReporte();
+    console.log("------>" + JSON.stringify(a));
+
     const coleccionReportes = await db.reportes.find({indEstado:1});
      coleccionReportes.forEach(reporte => {
          
@@ -64,7 +67,6 @@ async function sendReport(job, done) {
             });
         }); 
     });
-
     done();
 }
 
@@ -116,10 +118,17 @@ function actualizarReporteMutode(idReporte, urlLog){
 
 function incrementarSecuenciaImagenes(nombreSecuencia){
     return db.seqimagenes.findAndModify({
-        query: { sequenceName: nombreSecuencia },
-        update: { $inc: { sequenceValue: 1 } },
+        query: {sequenceName: nombreSecuencia},
+        update: {$inc: {sequenceValue: 1}},
         new: true
       });
+}
+
+function consultarUltimaImagenReporte(idReporte){
+    return db.imagenes.aggregate([
+        {$match:{idReporte:idReporte}},
+        {$group: {_id:null,max:{$max:"$idImagen"}}}
+    ]);
 }
 
 function lanzarCypress(nombreScreenshot, nombreVideo, rutaConfiguracionArchivo, reporte, aplicacion, herramienta){
