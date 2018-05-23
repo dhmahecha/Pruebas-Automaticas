@@ -61,5 +61,3 @@ Nuevas
 /comparacionesvisuales/reportes/:idPrueba GET -> devuelve la regresión visual de las pruebas
 
 
-Para la última iteración
-Niveles y tipos de pruebas

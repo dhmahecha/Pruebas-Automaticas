@@ -8,9 +8,10 @@ const fs = require("mz/fs");
 const compare = require('resemblejs').compare;
 
 const HERRAMIENTA_CYPRESS = 1;
-const NYGTHWATCH = 2;
+const CYPRESS_MONKEYS = 2;
 const LIGHTHOUSE = 3;
 const MUTODE = 4;
+
 
 const ESTADO_EN_PROCESO = 1;
 const ESTADO_PROCESADO = 2;
@@ -39,8 +40,7 @@ const coleccionReportes = await db.reportes.find({indEstado:ESTADO_EN_PROCESO});
 coleccionReportes.forEach(reporte => {
     consultarUltimaImagenPrueba(reporte.idPrueba)
         .then((results) => {
-            imagenesAnteriores = results; 
-            console.log(imagenesAnteriores);       
+            imagenesAnteriores = results;       
             actualizarEstadoReporte(reporte.idReporte)
             .then((results) => {
                 var reporte = results;
@@ -59,13 +59,23 @@ coleccionReportes.forEach(reporte => {
 
                                 var nombreScreenshot = "Imagen_reporte_" + reporte.idReporte + "_prueba_" + prueba.idPrueba + "_";
                                 var nombreVideo = "Video_reporte" + reporte.idReporte + "_prueba_" + prueba.idPrueba;
-                                var rutaConfiguracionArchivo = herramienta.rutaConfiguracion + prueba.nombreArchivo;
-                                if(heramientaaplicacion.idHerramienta == HERRAMIENTA_CYPRESS){
+                                var rutaConfiguracionArchivo = herramienta.rutaConfiguracion + "monkey_testing_ripper.spec.js";
+
+                                console.log(heramientaaplicacion.idHerramienta);
+                                if(heramientaaplicacion.idHerramienta == CYPRESS_MONKEYS){
+                                    console.log("Enviando Prueba de monkeys");         
+                                }
+                                else{
+                                    rutaConfiguracionArchivo = herramienta.rutaConfiguracion + prueba.nombreArchivo;
+                                }
+
+                                if(heramientaaplicacion.idHerramienta == HERRAMIENTA_CYPRESS || heramientaaplicacion.idHerramienta == CYPRESS_MONKEYS){
+                                    console.log("Se lanzará cypress");
                                     lanzarCypress(nombreScreenshot, nombreVideo, rutaConfiguracionArchivo, reporte, aplicacion, herramienta, imagenesAnteriores);
                                 }
                                 else if(heramientaaplicacion.idHerramienta == LIGHTHOUSE){
                                     lanzarLighthouse(herramienta,aplicacion,prueba,reporte,rutaConfiguracionArchivo);
-                                }   
+                                }  
                             });    
                         }); 
                     });    
@@ -121,8 +131,9 @@ function actualizarEstadoReporte(idReporte){
 }
 
 function actualizarReporteCypress(idReporte, rutaVideo, cypress){
+    console.log("Actualizando reporte");
     return db.reportes.update({
-        idReporte: idReporte}, {$set: {urlVideo: rutaVideo, informacion: JSON.stringify(cypress)}}, {multi: true}
+        idReporte: idReporte}, {$set: {urlVideo: rutaVideo, informacion: JSON.stringify(cypress), fechaProcesamiento: Date.now}}, {multi: true}
     );
 }
 
@@ -131,13 +142,13 @@ function actualizarReporteLighthouse(idReporte, rutaReporte, informacion){
         idReporte: idReporte}, {$set: {urlReporte: rutaReporte, informacion: informacion}}, {multi: true}
     );*/
     return db.reportes.update({
-        idReporte: idReporte}, {$set: {urlReporte: rutaReporte}}, {multi: true}
+        idReporte: idReporte}, {$set: {urlReporte: rutaReporte, fechaProcesamiento: Date.now}}, {multi: true}
     );
 }
 
 function actualizarReporteMutode(idReporte, urlLog){
     return db.reportes.update({
-        idReporte: idReporte}, {$set: {urlLog: urlLog}}, {multi: true}
+        idReporte: idReporte}, {$set: {urlLog: urlLog, fechaProcesamiento: Date.now}}, {multi: true}
     );
 }
 
@@ -174,21 +185,16 @@ function incrementarSecuenciaComparacionesVisuales(nombreSecuencia){
         {$match:{idPrueba:idPrueba, indEstado:ESTADO_PROCESADO}},
         {$group: {_id:null,max:{$max:"$idReporte"}}}
     ]).then((results) => {
-        var idReporte = results[0].max;
-        console.log(idReporte);
-        return getImagenesReporte(idReporte)
-        .then((results) => {
-            
-            console.log(results);
-            return results;
-            /*if(results != null && results != undefined && results != ""){
-                console.log(JSON.stringify(results));
-                return getImagenes(results[0].max)
-                .then((results) => {
-                    return results;
-                });
-            }*/   
-        });
+        if(results != undefined && results != ""){
+            var idReporte = results[0].max;
+            return getImagenesReporte(idReporte)
+            .then((results) => {
+                return results;
+            });
+        }
+        else{
+            return "";
+        }
     }); 
 }
 

@@ -359,15 +359,16 @@ router.route('/pruebas')
 			}
 		).then((results) => {
 			secuencia = results.sequenceValue;
-			Pruebas.findOne(
+			var herramientasAplicaciones = HerramientasAplicaciones.findOne(
 				// query
-				{idHerramienta: req.params.idHerramienta, idAplicacion: req.params.idAplicacion},
-				// callback function
-				(err, prueba) => {
-					if (err) 
-						return err;
-					return  prueba;
-			}).then((results) => {		
+				{idHerramienta: req.body.idHerramienta, idAplicacion: req.body.idAplicacion},
+				(err, herramientaaplicacion) => {
+				if (err) 
+					return err;
+				return  herramientaaplicacion;
+			})
+			.then((results) => {
+				console.log(results);	
 				var prueba = new Pruebas();      // create a new instance of the Pruebas model
 				prueba.idPrueba = secuencia;  
 				prueba.idHerramientaAplicacion = results.idHerramientaAplicacion
@@ -377,7 +378,7 @@ router.route('/pruebas')
 					if (err)
 						res.send(err);
 
-					res.json({ message: 'Prueba creada!' });
+					res.json({ message: 'Prueba '+ secuencia +' creada!' });
 				});
 			});	
 		});		
