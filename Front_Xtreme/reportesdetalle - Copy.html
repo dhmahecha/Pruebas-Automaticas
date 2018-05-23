@@ -21,24 +21,23 @@
         <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
         <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
-
     <script type="text/javascript" src="/js/config.js"></script>
     <script type="text/javascript" src="/js/scripts.js"></script>
     <script src="https://code.jquery.com/jquery-3.3.1.js"
             integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
             crossorigin="anonymous">
     </script>
-
+    <script>
+        function getParameterByName(name) {
+            name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+            var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+            results = regex.exec(location.search);
+            return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+        }
+    </script>
     <script>
         (function () {
-            //TODO: Validar que sea un numero valido
-            var pruebaId = getParameterByName('prueba');
-            var herramientap = getParameterByName('herramienta');
-            var aplicacionp = getParameterByName('aplicacion');
-            var titulo = "Resultados de prueba " + pruebaId + " para " + aplicacionp + " con " + herramientap;
-            console.log("Titulo: " + titulo);
-                                              
-            $.getJSON(globalVariable.url_json + "/api/reportes/pruebas/" + pruebaId).done(function (data) {
+            $.getJSON(globalVariable.url_json + "/api/reportes").done(function (data) {
                 if (data) {
                     if (data.length > 0 && data != "[]") {
 
@@ -46,39 +45,22 @@
                         var result = "";
                         var $dropdown = $("#dropdown");
 
-                        $('#titulopagina').html(titulo);
-                                                                       
-                        var textojs = "";
-
                         $(data).each(function () {
                             var reporte = this.idReporte;
                             var fechaFormato = formatDate(this.fechaReporte, 5);
-                            var nombrereporte = "Reporte " + reporte + " - " + fechaFormato;
-                            $("#reporte").append($("<option></option>").val(reporte).html("Principal: " + nombrereporte));
-                            $("#reporteversus").append($("<option></option>").val(reporte).html("Comparación; " + nombrereporte));
-                                                        
-                            if (typeof this.informacion === 'string') {
-                                var jsinfo = JSON.parse(this.informacion);
-
-                                if (textojs != "") {
-                                    textojs = textojs + ", ";
-                                }
-
-                                textojs = textojs + '{ \"fecha\":\"' + fechaFormato + '\", \"duracion\":\"' + jsinfo.duration + '\"}';                                
-                            }                            
+                            var nombrereporte = this.idReporte + " - " + fechaFormato;
+                            $("#reporte").append($("<option></option>").val(reporte).html(nombrereporte));
                         });
 
-                        if (textojs == "") {
-                            textojs = '[{ \"fecha\":\"HOY\", \"duracion\":\"50\"}]';
-                        }
-                        else {
-                            textojs = "[" + textojs + "]";
+                        var reporteId = getParameterByName('reporte');
+                        console.log("Reporte invocado: " + reporteId);
+
+                        if (true) //TODO: Validar que sea un numero
+                        {
+                            $('#reporte').val(reporteId);
+                            $('#reporte').trigger("change");
                         }
 
-                        console.log("array1: " + textojs);
-                        console.log("array: " + JSON.parse(textojs));
-
-                        pintarDuracionReportes(JSON.parse(textojs));                        
                     }
                 }
             });
@@ -349,23 +331,17 @@
         <div id="page-wrapper">
             <div class="row">
                 <div class="col-lg-12">
-                    <h4 class="page-header" id="titulopagina"></h4>
+                    <h4 class="page-header">Resultados de Ejecuciones</h4>
                 </div>
                 <div class="row">
-                    <div class="col-lg-12">
-                        <div class="form-group">
-                            <select class="form-control" id="reporte" onchange="validarComboboxSeleccionado();">
-                                <option value="0" selected="selected">Seleccione reporte principal...</option>
-                            </select>
-                        </div>
+                    <div class="col-lg-1">
+                        <label for="reporte">Reporte:</label>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="form-group">
-                            <select class="form-control" id="reporteversus" onchange="validarComboboxSeleccionado();">
-                                <option value="0" selected="selected">Seleccione reporte a comparar...</option>
-                            </select>                            
+                    <div class="col-lg-11">
+                        <div class="form-group">                            
+                            <select class="form-control" id="reporte">
+                                <option value="0" selected="selected">Seleccione reporte...</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -475,7 +451,7 @@
                     <div class="col-lg-8">
                         <div class="panel panel-default">
                             <div class="panel-heading">
-                                <i class="fa fa-bar-chart-o fa-fw"></i> Duración Reportes Ejecutados
+                                <i class="fa fa-bar-chart-o fa-fw"></i> Area Chart Example
                                 <div class="pull-right">
                                     <div class="btn-group">
                                         <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
@@ -501,11 +477,6 @@
                                 </div>
                             </div>
                             <!-- /.panel-heading -->
-                            <!--
-                            <div class="panel-body">
-                                <div id="morris-area-chart"></div>
-                            </div>
-                                -->
                             <div class="panel-body">
                                 <div id="morris-area-chart"></div>
                             </div>
@@ -545,7 +516,7 @@
                                         </span>
                                     </a>
                                     <a href="#" class="list-group-item">
-                                        <i class="fa fa-image fa-fw"></i>Regresión Visual
+                                        <i class="fa fa-image fa-fw"></i>Comparar IMGs
                                         <span class="pull-right text-muted small">
                                             <em id="icompara">N/A</em>
                                         </span>
@@ -567,7 +538,7 @@
                     <div class="col-lg-12">
                         <div class="panel panel-default">
                             <div class="panel-heading">
-                                <i class="fa fa-file-photo-o fa-fw"></i>Reporte LightHouse Principal
+                                <i class="fa fa-file-photo-o fa-fw"></i>Reporte LightHouse
 
                                 <div class="pull-right">
                                     <div class="btn-group">
@@ -589,54 +560,15 @@
                         </div>
                     </div>
                 </div>
-                <!--Linea4B Lighthouseversus-->
-                <div class="row" id="lighthouserowversus">
-                    <div class="col-lg-12">
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                <i class="fa fa-file-photo-o fa-fw"></i>Reporte LightHouse Comparación
-                                <div class="pull-right">
-                                    <div class="btn-group">
-                                        <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
-                                            Acciones
-                                            <span class="caret"></span>
-                                        </button>
-                                        <ul class="dropdown-menu pull-right" role="menu">
-                                            <li id="lighthouseaversus">
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-
-                            </div>
-                            <div class="panel-body">
-                                <div id="lighthouseversus" style="width:100%; height:100%"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
                 <!--Linea5 Mutantes-->
                 <div class="row" id="mutantesrow">
                     <div class="col-lg-12">
                         <div class="panel panel-default">
                             <div class="panel-heading">
-                                <i class="fa fa-group fa-fw"></i>Reporte Mutantes Principal
+                                <i class="fa fa-group fa-fw"></i>Reporte Mutantes
                             </div>
                             <div class="panel-body">
                                 <div id="mutantesbody" style="width:100%; height:100%"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!--Linea5B Mutantesversus-->
-                <div class="row" id="mutantesrowversus">
-                    <div class="col-lg-12">
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                <i class="fa fa-group fa-fw"></i>Reporte Mutantes Comparación
-                            </div>
-                            <div class="panel-body">
-                                <div id="mutantesbodyversus" style="width:100%; height:100%"></div>
                             </div>
                         </div>
                     </div>
@@ -695,204 +627,117 @@
     <script src="/vendor/metisMenu/metisMenu.min.js"></script>
     <!-- Custom Theme JavaScript -->
     <script src="/dist/js/sb-admin-2.js"></script>
+    <!-- Morris Charts JavaScript -->
+    <script src="/vendor/raphael/raphael.min.js"></script>
+    <script src="/vendor/morrisjs/morris.min.js"></script>
+    <script src="/data/morris-data.js"></script>
 
     <script>
-        function validarComboboxSeleccionado() {
-            //Validar si por lo menos el reporte principal está seleccionado
-            if ($('#reporte').val() != 0) {
-                cargarDataPrincipal();
-            }
-        }
-    </script>
-
-    <script>
-        function cargarDataPrincipal() {
+        $('#reporte').change(function () {
             var idreporte = $('#reporte').val();
 
-            $.ajax({
-                dataType: "json",
-                url: globalVariable.url_json + "/api/reportes/" + idreporte,
-                success: function (data) {
-                    cargarDataVersus(data);
-                }
-            });
-        }
-    </script>
-    <script>
-        function cargarDataVersus(dataPrincipal) {
-            var idreporteVersus = $('#reporteversus').val();
+            console.log("Llamado al evento change");
 
-            $.ajax({
-                dataType: "json",
-                url: globalVariable.url_json + "/api/reportes/" + idreporteVersus,
-                success: function (dataVersus) {
-                    realizarComparacion(dataPrincipal, dataVersus);
-                }
-            });
-        }
-    </script>
-
-    <script>
-        function realizarComparacion(data, dataVersus) {
-            var idreporte = $('#reporte').val();
-            var idreporteVersus = $('#reporteversus').val();
-            var hayComparacion = false;
-
-            console.log("data_Princ " + data);
-            console.log("data_Vs " + dataVersus);
-
-            if (data) {
-                if (data != "[]") {
-                    //Revisar si se requiere comparación. Lo que se deduce de si la dataVersus está cargada.
-                    if (dataVersus) {
-                        if (dataVersus != "[]") {
-                            hayComparacion = true;
-                        }
-                    }
-
-                    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                    //Mostrar lighthouse
-                    $('#lighthouserow').hide();
-                    $('#lighthouserowversus').hide();
-
-                    if (typeof data.urlReporte === 'string') {
-                        var repo = globalVariable.url_json + "/" + data.urlReporte;
-                        $('#lighthouse').html("<object type=\"text/html\" data=\"" + repo + " \" style=\"width:100%; height:300px\"></object>");
-                        $('#lighthousea').html("<a href=\"" + repo + "\" target=\"_blank\">Ir al reporte</a>");
-                        $('#lighthouserow').show();
-                    }
-
-                    if (hayComparacion) {
-                        if (typeof dataVersus.urlReporte === 'string') {
-                            var repoVs = globalVariable.url_json + "/" + dataVersus.urlReporte;
-                            $('#lighthouseversus').html("<object type=\"text/html\" data=\"" + repoVs + " \" style=\"width:100%; height:300px\"></object>");
-                            $('#lighthouseaversus').html("<a href=\"" + repoVs + "\" target=\"_blank\">Ir al reporte</a>");
-                            $('#lighthouserowversus').show();
-                        }
-                    }
-
-                    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                    //Mostrar Mutantes
-                    $('#mutantesrow').hide();
-                    $('#mutantesrowversus').hide();
-
-                    if (typeof data.urlLog === 'string') {
-                        var log = globalVariable.url_json + "/" + data.urlLog;
-                        console.log("log: " + log);
-                        $('#mutantesbody').html("<object type=\"text/plain\" data=\"" + log + " \" style=\"width:100%; height:300px\"></object>");
-                        //$('#mutantesbody').html("<a href=\"" + repo + "\" target=\"_blank\">Ir al reporte</a>");
-                        $('#mutantesrow').show();
-                    }
-
-                    if (hayComparacion) {
-                        if (typeof dataVersus.urlLog === 'string') {
-                            var logVs = globalVariable.url_json + "/" + dataVersus.urlLog;
-                            console.log("logVs: " + log);
-                            $('#mutantesbodyversus').html("<object type=\"text/plain\" data=\"" + logVs + " \" style=\"width:100%; height:300px\"></object>");
-                            $('#mutantesrowversus').show();
-                        }
-                    }
-
-                    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                    //Mostrar info general
-                    if (typeof data.informacion === 'string') {
-                        var jsinfo = JSON.parse(data.informacion);
-                        $('#itest').html(jsinfo.tests);
-                        $('#icorrectos').html(jsinfo.passes);
-                        $('#ipendientes').html(jsinfo.passes);
-                        $('#ifallos').html(jsinfo.failures);
-                        $('#iduracion').html(jsinfo.duration);
-                        $('#iscreen').html(jsinfo.screenshots);
-                        $('#iversion').html(jsinfo.version);
-
-                        if (jsinfo.video) {
-                            //console.log("vid");
-                            //console.log(data.urlVideo);
-                            //console.log(jsinfo.ulrVideo);
-                            var ulrVideo = globalVariable.url_json + "/" + data.urlVideo;
-                            $('#ivideo').html("<a href=\"" + ulrVideo + "\" target=\"_blank\">Ver...</a><a href=\"#\" onclick=\"verVideoModal()\">&nbsp;&nbsp;&nbsp;...</a>");
-
-                            var vid = document.getElementById("modalvideocontrol");
-                            vid.src = ulrVideo;
+            $.getJSON(globalVariable.url_json + "/api/reportes/" + idreporte).done(function (data) {
+                if (data) {
+                    if (data != "[]") {
+                        //Mostrar lighthouse
+                        if (typeof data.urlReporte === 'string') {
+                            var repo = globalVariable.url_json + "/" + data.urlReporte;
+                            $('#lighthouse').html("<object type=\"text/html\" data=\"" + repo + " \" style=\"width:100%; height:300px\"></object>");
+                            $('#lighthousea').html("<a href=\"" + repo + "\" target=\"_blank\">Ir al reporte</a>");
+                            $('#lighthouserow').show();
                         }
                         else {
-                            $('#ivideo').html("Sin video");
+                            $('#lighthouserow').hide();
                         }
-                    }//if data.information
 
-                    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                    //Comparar imágenes
-                    $.getJSON(globalVariable.url_json + "/api/imagenes/reportes/" + idreporte).done(function (dataimg) {
-                        //console.log("dataimg para: " + idreporte);
-                        if (dataimg) {
-                            if (dataimg.length > 0 && dataimg != "[]") {
-                                var estructura = "";
-                                var divCerrado = false;
+                        //Mostrar Mutantes
+                        if (typeof data.urlLog === 'string') {
+                            var log = globalVariable.url_json + "/" + data.urlLog;
+                            console.log("log: " + log);
+                            $('#mutantesbody').html("<object type=\"text/plain\" data=\"" + log + " \" style=\"width:100%; height:300px\"></object>");
+                            //$('#mutantesbody').html("<a href=\"" + repo + "\" target=\"_blank\">Ir al reporte</a>");
+                            $('#mutantesrow').show();
+                        }
+                        else {
+                            $('#mutantesrow').hide();
+                        }
 
-                                for (i = 0; i < dataimg.length; i++) {
-                                    //console.log("iteracionImg " + i + ": " + dataimg[i]);
-                                    //console.log(dataimg[i].urlImagen);
-                                    var imagenRutaCompleta = dataimg[i].urlImagen;
-                                    var idImagen = dataimg[i].idImagen;
+                        if (typeof data.informacion === 'string') {
+                            var jsinfo = JSON.parse(data.informacion);
+                            $('#itest').html(jsinfo.tests);
+                            $('#icorrectos').html(jsinfo.passes);
+                            $('#ipendientes').html(jsinfo.passes);
+                            $('#ifallos').html(jsinfo.failures);
+                            $('#iduracion').html(jsinfo.duration);
+                            $('#iscreen').html(jsinfo.screenshots);
+                            $('#iversion').html(jsinfo.version);
 
-                                    var par = i % 2;
+                            if (jsinfo.video) {
+                                //console.log("vid");
+                                //console.log(data.urlVideo);
+                                //console.log(jsinfo.ulrVideo);
+                                var ulrVideo = globalVariable.url_json + "/" + data.urlVideo;
+                                $('#ivideo').html("<a href=\"" + ulrVideo + "\" target=\"_blank\">Ver...</a><a href=\"#\" onclick=\"verVideoModal()\">&nbsp;&nbsp;&nbsp;...</a>");
 
-                                    if (!par) {
-                                        estructura = estructura + "<div class=\"row\">";
-                                        divCerrado = false;
-                                    }
+                                var vid = document.getElementById("modalvideocontrol");
+                                vid.src = ulrVideo;
+                            }
+                            else {
+                                $('#ivideo').html("Sin video");
+                            }
+                        }//if data.information
 
-                                    estructura = estructura + "<div class=\"col-lg-6\"><div class=\"panel panel-default\"><div class=\"panel-heading\"><i class=\"fa fa-file-photo-o fa-fw\"></i>" + imagenRutaCompleta.replace("public/imagenes/cypress/", "") + "<br><label class=\"checkbox-inline\"><input type=\"checkbox\" value=\"" + idImagen + "\"  onclick=\"comparacion();\">Comparar</label></div>";
+                        $.getJSON(globalVariable.url_json + "/api/imagenes/reportes/" + idreporte).done(function (dataimg) {
+                            //console.log("dataimg para: " + idreporte);
+                            if (dataimg) {
+                                if (dataimg.length > 0 && dataimg != "[]") {
+                                    var estructura = "";
+                                    var divCerrado = false;
 
-                                    estructura = estructura + "<div class=\"panel-body\"><a href=\"" + globalVariable.url_json + "/" + imagenRutaCompleta + "\" target=\"_blank\"><img src=\"" + globalVariable.url_json + "/" + imagenRutaCompleta + "\" class=\"img-thumbnail\"></a></div></div></div>";
+                                    for (i = 0; i < dataimg.length; i++) {
+                                        //console.log("iteracionImg " + i + ": " + dataimg[i]);
+                                        //console.log(dataimg[i].urlImagen);
+                                        var imagenRutaCompleta = dataimg[i].urlImagen;
+                                        var idImagen = dataimg[i].idImagen;
 
-                                    if (par) {
+                                        var par = i % 2;
+
+                                        if (!par) {
+                                            estructura = estructura + "<div class=\"row\">";
+                                            divCerrado = false;
+                                        }
+
+                                        estructura = estructura + "<div class=\"col-lg-6\"><div class=\"panel panel-default\"><div class=\"panel-heading\"><i class=\"fa fa-file-photo-o fa-fw\"></i>" + imagenRutaCompleta.replace("public/imagenes/cypress/", "") + "<br><label class=\"checkbox-inline\"><input type=\"checkbox\" value=\"" + idImagen + "\"  onclick=\"comparacion();\">Comparar</label></div>";
+
+                                        estructura = estructura + "<div class=\"panel-body\"><a href=\"" + globalVariable.url_json + "/" + imagenRutaCompleta + "\" target=\"_blank\"><img src=\"" + globalVariable.url_json + "/" + imagenRutaCompleta + "\" class=\"img-thumbnail\"></a></div></div></div>";
+
+                                        if (par) {
+                                            estructura = estructura + "</div>";
+                                            divCerrado = true;
+                                        }
+                                    }//for
+
+                                    if (!divCerrado) {
                                         estructura = estructura + "</div>";
-                                        divCerrado = true;
                                     }
-                                }//for
 
-                                if (!divCerrado) {
-                                    estructura = estructura + "</div>";
+                                    $('#imagenes').html(estructura);
+                                    $('#imagenes').show();
                                 }
-
-                                $('#imagenes').html(estructura);
-                                $('#imagenes').show();
+                                else {
+                                    $('#imagenes').hide();
+                                }
                             }
                             else {
                                 $('#imagenes').hide();
                             }
-                        }
-                        else {
-                            $('#imagenes').hide();
-                        }
-                    }); //Imágenes por reporte
+                        }); //Imágenes por reporte
+                    }
                 }
-            }
-        }
-    </script>
-
-    <!-- Morris Charts JavaScript -->
-    <script src="/vendor/raphael/raphael.min.js"></script>
-    <script src="/vendor/morrisjs/morris.min.js"></script>
-    <!--<script src="/data/morris-data.js"></script>-->
-
-    <script type="text/javascript">
-        function pintarDuracionReportes(dataArray) {
-            Morris.Area({
-                element: 'morris-area-chart',
-                data: dataArray,
-                xkey: 'fecha',
-                ykeys: ['duracion'],
-                labels: ['Tiempo Empleado (seg)'],
-                pointSize: 2,
-                hideHover: 'auto',
-                resize: true,
-                parseTime: false
             });
-        }
-
+        });
     </script>
-
 </body>
 </html>
